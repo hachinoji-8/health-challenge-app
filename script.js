@@ -1,70 +1,86 @@
-const stampGrid = document.getElementById("stampGrid");
+const grid = document.getElementById("stampGrid");
 const markButton = document.getElementById("markButton");
 const submitButton = document.getElementById("submitButton");
-
 const maxDays = 30;
 
-// 初期化
 function createGrid() {
   for (let i = 0; i < maxDays; i++) {
-    const cell = document.createElement("div");
-    cell.className = "cell";
-    cell.id = "cell-" + i;
-    stampGrid.appendChild(cell);
+    const wrapper = document.createElement("div");
+    wrapper.className = "cell-wrapper";
+
+    const base = document.createElement("div");
+    base.className = "cell-base";
+
+    const img = document.createElement("img");
+    img.src = "heart.png";  // 差し替え可能
+    img.alt = "スタンプ";
+    base.appendChild(img);
+
+    const cover = document.createElement("div");
+    cover.className = "cell-cover";
+    cover.id = "cover-" + i;
+
+    wrapper.appendChild(base);
+    wrapper.appendChild(cover);
+    grid.appendChild(wrapper);
   }
 }
 
-// 現在の日付キーを取得（yyyy-mm-dd）
 function getTodayKey() {
-  const today = new Date();
-  return today.toISOString().split("T")[0];
+  const d = new Date();
+  return d.toISOString().split("T")[0];
 }
 
-// スタンプを再描画
-function renderStamps() {
-  const data = JSON.parse(localStorage.getItem("challenge-stamps") || "[]");
-  data.forEach((d, i) => {
-    const cell = document.getElementById("cell-" + i);
-    if (cell) {
-      cell.classList.add("stamped");
-      cell.textContent = "🦷";
+function getProgress() {
+  return JSON.parse(localStorage.getItem("challenge-progress") || "[]");
+}
+
+function renderProgress() {
+  const progress = getProgress();
+  progress.forEach((_, i) => {
+    const cover = document.getElementById("cover-" + i);
+    if (cover) {
+      cover.classList.add("removed");
     }
   });
-  if (data.length >= maxDays) {
+  if (progress.length >= maxDays) {
     enableSubmit();
   }
 }
 
-// 今日が押されたかチェック
 function alreadyStampedToday() {
-  const last = localStorage.getItem("last-stamped-date");
-  return last === getTodayKey();
+  return localStorage.getItem("last-stamped-date") === getTodayKey();
 }
 
-// 今日のスタンプ押し
+function updateButtonState() {
+  markButton.disabled = alreadyStampedToday();
+}
+
 function markToday() {
   if (alreadyStampedToday()) return;
-  let data = JSON.parse(localStorage.getItem("challenge-stamps") || "[]");
-  if (data.length >= maxDays) return;
-  data.push(getTodayKey());
-  localStorage.setItem("challenge-stamps", JSON.stringify(data));
-  localStorage.setItem("last-stamped-date", getTodayKey());
-  renderStamps();
-  markButton.disabled = true;
+  let progress = getProgress();
+  if (progress.length >= maxDays) return;
+
+  const today = getTodayKey();
+  progress.push(today);
+  localStorage.setItem("challenge-progress", JSON.stringify(progress));
+  localStorage.setItem("last-stamped-date", today);
+
+  const cover = document.getElementById("cover-" + (progress.length - 1));
+  if (cover) cover.classList.add("removed");
+
+  updateButtonState();
+  if (progress.length >= maxDays) {
+    enableSubmit();
+  }
 }
 
-// 応募ボタン有効化
 function enableSubmit() {
   submitButton.classList.add("enabled");
   submitButton.removeAttribute("disabled");
 }
 
-// ボタン状態制御
-function updateButtonState() {
-  markButton.disabled = alreadyStampedToday();
-}
-
-// 実行
 createGrid();
-renderStamps();
+renderProgress();
 updateButtonState();
+markButton.addEventListener("click", markToday);
