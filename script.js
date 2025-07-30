@@ -1,6 +1,14 @@
-const grid = document.getElementById("stampGrid");
+
+const goalInput = document.getElementById("goalInput");
+const setGoalButton = document.getElementById("setGoalButton");
+const goalScreen = document.getElementById("goalScreen");
+const calendarScreen = document.getElementById("calendarScreen");
+const userGoal = document.getElementById("userGoal");
+
 const markButton = document.getElementById("markButton");
-const submitButton = document.getElementById("submitButton");
+const submitButton14 = document.getElementById("submitButton14");
+const submitButton30 = document.getElementById("submitButton30");
+const grid = document.getElementById("stampGrid");
 const maxDays = 30;
 
 function createGrid() {
@@ -12,7 +20,7 @@ function createGrid() {
     base.className = "cell-base";
 
     const img = document.createElement("img");
-    img.src = "heart.png";  // 差し替え可能
+    img.src = "heart.png";
     img.alt = "スタンプ";
     base.appendChild(img);
 
@@ -27,8 +35,7 @@ function createGrid() {
 }
 
 function getTodayKey() {
-  const d = new Date();
-  return d.toISOString().split("T")[0];
+  return new Date().toISOString().split("T")[0];
 }
 
 function getProgress() {
@@ -43,8 +50,11 @@ function renderProgress() {
       cover.classList.add("removed");
     }
   });
-  if (progress.length >= maxDays) {
-    enableSubmit();
+  if (progress.length >= 14) {
+    enableSubmit(submitButton14);
+  }
+  if (progress.length >= 30) {
+    enableSubmit(submitButton30);
   }
 }
 
@@ -70,17 +80,40 @@ function markToday() {
   if (cover) cover.classList.add("removed");
 
   updateButtonState();
-  if (progress.length >= maxDays) {
-    enableSubmit();
+  if (progress.length >= 14) {
+    enableSubmit(submitButton14);
+  }
+  if (progress.length >= 30) {
+    enableSubmit(submitButton30);
   }
 }
 
-function enableSubmit() {
-  submitButton.classList.add("enabled");
-  submitButton.removeAttribute("disabled");
+function enableSubmit(button) {
+  button.classList.remove("disabled");
+  button.classList.add("enabled");
+  button.removeAttribute("disabled");
 }
 
-createGrid();
-renderProgress();
-updateButtonState();
-markButton.addEventListener("click", markToday);
+function setGoal() {
+  const goalText = goalInput.value.trim();
+  if (goalText) {
+    localStorage.setItem("user-goal", goalText);
+    goalScreen.classList.add("hidden");
+    calendarScreen.classList.remove("hidden");
+    userGoal.textContent = "🌟 あなたの目標: " + goalText;
+  }
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  const savedGoal = localStorage.getItem("user-goal");
+  if (savedGoal) {
+    goalScreen.classList.add("hidden");
+    calendarScreen.classList.remove("hidden");
+    userGoal.textContent = "🌟 あなたの目標: " + savedGoal;
+  }
+  createGrid();
+  renderProgress();
+  updateButtonState();
+  markButton.addEventListener("click", markToday);
+  setGoalButton.addEventListener("click", setGoal);
+});
