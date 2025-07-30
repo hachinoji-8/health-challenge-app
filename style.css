@@ -1,22 +1,48 @@
 
 body {
   font-family: sans-serif;
-  background: #fff8e1;
   margin: 0;
-  padding: 2rem;
-  text-align: center;
+  background-color: #fff;
 }
 
-h1 {
-  background-color: #ff7043;
-  color: white;
+.goal-screen {
+  padding: 2rem;
+  text-align: center;
+  background: #fce4ec;
+}
+
+.goal-screen input {
   padding: 1rem;
+  width: 80%;
+  max-width: 400px;
+  font-size: 16px;
+  margin: 1rem 0;
+}
+
+.goal-screen button {
+  padding: 1rem 2rem;
+  font-size: 16px;
+  background: #ec407a;
+  color: white;
+  border: none;
   border-radius: 10px;
+  cursor: pointer;
 }
 
 .container {
-  max-width: 600px;
-  margin: auto;
+  padding: 2rem;
+  text-align: center;
+  background-image: linear-gradient(45deg, #fce4ec 25%, transparent 25%),
+                    linear-gradient(-45deg, #fff9c4 25%, transparent 25%),
+                    linear-gradient(45deg, transparent 75%, #fce4ec 75%),
+                    linear-gradient(-45deg, transparent 75%, #fff9c4 75%);
+  background-size: 40px 40px;
+  background-position: 0 0, 0 20px, 20px -20px, -20px 0px;
+  min-height: 100vh;
+}
+
+h1 {
+  margin-top: 0;
 }
 
 .grid {
@@ -83,20 +109,27 @@ h1 {
   cursor: not-allowed;
 }
 
-#submitButton {
-  display: inline-block;
+a {
   text-decoration: none;
   padding: 1rem 2rem;
   font-size: 16px;
+  border-radius: 10px;
+  margin: 0 0.5rem;
+  display: inline-block;
+}
+
+a.disabled {
   background: #9e9e9e;
   color: white;
-  border-radius: 10px;
   pointer-events: none;
 }
 
-#submitButton.enabled {
+a.enabled {
   background: #43a047;
+  color: white;
   pointer-events: auto;
 }
 
-
+.hidden {
+  display: none;
+}
