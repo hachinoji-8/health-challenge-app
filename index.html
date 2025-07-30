@@ -7,13 +7,21 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div class="container">
-    <h1>健康チャレンジカレンダー</h1>
+  <div class="goal-screen" id="goalScreen">
+    <h1>健康週間の目標を入力してね</h1>
+    <input type="text" id="goalInput" placeholder="例: 毎日歯みがきする⭐︎" />
+    <button id="setGoalButton">決定</button>
+  </div>
+
+  <div class="container hidden" id="calendarScreen">
+    <h1 id="userGoal"></h1>
     <div class="grid" id="stampGrid"></div>
     <button id="markButton">🎯 今日の達成！</button>
-    <a id="submitButton" href="https://www.tochigi-coop.jp/" target="_blank" class="disabled" disabled>✅ 応募する</a>
+    <div class="buttons">
+      <a id="submitButton14" href="https://www.tochigi-coop.jp/" target="_blank" class="disabled" disabled>✅ 14日達成で応募</a>
+      <a id="submitButton30" href="https://www.tochigi-coop.jp/" target="_blank" class="disabled" disabled>🏆 30日達成で応募</a>
+    </div>
   </div>
   <script src="script.js"></script>
 </body>
 </html>
-
