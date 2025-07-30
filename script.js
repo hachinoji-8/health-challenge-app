@@ -1,124 +1,118 @@
+document.addEventListener("DOMContentLoaded", () => {
+  const goalInput = document.getElementById("goal-input");
+  const start14Btn = document.getElementById("start-14-btn");
+  const start30Btn = document.getElementById("start-30-btn");
+  const goalDisplay = document.getElementById("goal-display");
+  const calendar = document.getElementById("calendar");
+  const markButton = document.getElementById("mark-button");
+  const submitBtn = document.getElementById("submit-btn");
+  const startScreen = document.getElementById("start-screen");
+  const mainScreen = document.getElementById("main-screen");
 
-let clickCountTopRight = 0;
-let clickCountBottomRight = 0;
-let clickCountManual = 0;
-let clickCountResetManual = 0;
-let manualMarking = false;
+  let markedDays = JSON.parse(localStorage.getItem("markedDays")) || [];
+  let totalDays = parseInt(localStorage.getItem("totalDays")) || 30;
+  let goal = localStorage.getItem("goal") || "";
+  let startDate = localStorage.getItem("startDate");
 
-const goalInputContainer = document.getElementById("goalInputContainer");
-const app = document.getElementById("app");
-const goalInput = document.getElementById("goalInput");
-const goalText = document.getElementById("goalText");
-const calendar = document.getElementById("calendar");
-const markButton = document.getElementById("markButton");
-const submitBtn = document.getElementById("submitBtn");
+  const renderGoal = () => {
+    if (goal) {
+      goalDisplay.innerHTML = `<div class="goal-title">🌟 あなたの目標 🌟</div><div class="goal-text">${goal}</div>`;
+    }
+  };
 
-function startChallenge(days) {
-  const goal = goalInput.value.trim();
-  if (!goal) return alert("目標を入力してください");
-
-  localStorage.setItem("goal", goal);
-  localStorage.setItem("startDate", new Date().toDateString());
-  localStorage.setItem("totalDays", days);
-  localStorage.setItem("markedDays", JSON.stringify([]));
-
-  showApp();
-}
-
-function showApp() {
-  goalInputContainer.style.display = "none";
-  app.style.display = "block";
-  goalText.textContent = localStorage.getItem("goal");
-
-  generateCalendar();
-}
-
-function generateCalendar() {
-  calendar.innerHTML = "";
-  const totalDays = parseInt(localStorage.getItem("totalDays") || "30");
-  const markedDays = JSON.parse(localStorage.getItem("markedDays") || "[]");
-
-  for (let i = 0; i < totalDays; i++) {
-    const cell = document.createElement("div");
-    cell.className = "day";
-    if (markedDays.includes(i)) cell.classList.add("checked");
-
-    const stamp = document.createElement("img");
-    stamp.src = "heart.png";
-    stamp.className = "stamp";
-    stamp.style.width = "60%";
-    cell.appendChild(stamp);
-
-    cell.addEventListener("click", (e) => {
-      const rect = cell.getBoundingClientRect();
-      const offsetX = e.clientX - rect.left;
-      const offsetY = e.clientY - rect.top;
-
-      if (offsetX > rect.width * 0.75 && offsetY < rect.height * 0.25) {
-        clickCountTopRight++;
-        if (clickCountTopRight >= 15) {
-          localStorage.clear();
-          alert("目標をリセットしました");
-          location.reload();
-        }
-      } else if (offsetX > rect.width * 0.75 && offsetY > rect.height * 0.75) {
-        clickCountBottomRight++;
-        if (clickCountBottomRight >= 15) {
-          localStorage.removeItem("markedDays");
-          localStorage.removeItem("startDate");
-          alert("記録をリセットしました");
-          location.reload();
-        }
-      } else if (offsetX < rect.width * 0.25 && offsetY > rect.height * 0.75) {
-        clickCountManual++;
-        if (clickCountManual >= 15) {
-          manualMarking = true;
-          alert("マニュアル記録モードになりました。マスをタップして記録できます。");
-        }
-      } else if (offsetX < rect.width * 0.25 && offsetY < rect.height * 0.25) {
-        clickCountResetManual++;
-        if (clickCountResetManual >= 15) {
-          manualMarking = false;
-          alert("通常モードに戻りました");
-        }
-      } else if (manualMarking && !cell.classList.contains("checked")) {
-        cell.classList.add("checked");
-        let markedDays = JSON.parse(localStorage.getItem("markedDays") || "[]");
-        if (!markedDays.includes(i)) {
-          markedDays.push(i);
-          localStorage.setItem("markedDays", JSON.stringify(markedDays));
-          generateCalendar();
-        }
+  const renderCalendar = () => {
+    calendar.innerHTML = "";
+    for (let i = 1; i <= totalDays; i++) {
+      const cell = document.createElement("div");
+      cell.className = "calendar-cell";
+      const stamp = document.createElement("div");
+      stamp.className = "stamp";
+      const cover = document.createElement("div");
+      cover.className = "cover";
+      if (markedDays.includes(i)) {
+        cover.style.display = "none";
       }
-    });
+      cell.appendChild(stamp);
+      cell.appendChild(cover);
+      calendar.appendChild(cell);
+    }
+  };
 
-    calendar.appendChild(cell);
-  }
-
-  const markedDaysCount = JSON.parse(localStorage.getItem("markedDays") || "[]").length;
-  const totalDays = parseInt(localStorage.getItem("totalDays") || "30");
-  submitBtn.disabled = markedDaysCount < totalDays;
-}
-
-markButton.addEventListener("click", () => {
-  const startDate = new Date(localStorage.getItem("startDate"));
-  const today = new Date();
-  const daysSinceStart = Math.floor((today - startDate) / (1000 * 60 * 60 * 24));
-  const markedDays = JSON.parse(localStorage.getItem("markedDays") || "[]");
-
-  if (!markedDays.includes(daysSinceStart)) {
-    markedDays.push(daysSinceStart);
+  const updateStorage = () => {
     localStorage.setItem("markedDays", JSON.stringify(markedDays));
-    generateCalendar();
-  } else {
-    alert("今日はすでに記録済みです");
+  };
+
+  const canMarkToday = () => {
+    const today = new Date().toDateString();
+    if (!startDate) {
+      localStorage.setItem("startDate", today);
+      return true;
+    }
+    const lastMarked = localStorage.getItem("lastMarked") || "";
+    return today !== lastMarked;
+  };
+
+  const markToday = () => {
+    const today = new Date().toDateString();
+    const next = markedDays.length + 1;
+    if (next <= totalDays) {
+      markedDays.push(next);
+      updateStorage();
+      localStorage.setItem("lastMarked", today);
+      renderCalendar();
+      if (markedDays.length >= totalDays) {
+        submitBtn.disabled = false;
+      }
+    }
+  };
+
+  markButton.addEventListener("click", () => {
+    if (canMarkToday()) {
+      markToday();
+    } else {
+      alert("今日はすでに達成済みです！");
+    }
+  });
+
+  start14Btn.addEventListener("click", () => {
+    const inputGoal = goalInput.value.trim();
+    if (inputGoal) {
+      goal = inputGoal;
+      totalDays = 14;
+      localStorage.setItem("goal", goal);
+      localStorage.setItem("totalDays", totalDays);
+      localStorage.setItem("markedDays", JSON.stringify([]));
+      localStorage.removeItem("lastMarked");
+      localStorage.removeItem("startDate");
+      startScreen.style.display = "none";
+      mainScreen.style.display = "block";
+      renderGoal();
+      renderCalendar();
+    }
+  });
+
+  start30Btn.addEventListener("click", () => {
+    const inputGoal = goalInput.value.trim();
+    if (inputGoal) {
+      goal = inputGoal;
+      totalDays = 30;
+      localStorage.setItem("goal", goal);
+      localStorage.setItem("totalDays", totalDays);
+      localStorage.setItem("markedDays", JSON.stringify([]));
+      localStorage.removeItem("lastMarked");
+      localStorage.removeItem("startDate");
+      startScreen.style.display = "none";
+      mainScreen.style.display = "block";
+      renderGoal();
+      renderCalendar();
+    }
+  });
+
+  if (goal) {
+    startScreen.style.display = "none";
+    mainScreen.style.display = "block";
+    renderGoal();
+    renderCalendar();
   }
 });
-
-submitBtn.addEventListener("click", () => {
-  window.open("https://www.tochigi-kenko.org", "_blank");
-});
-
-// 初期化
-if (localStorage.getItem("goal")) showApp();
 
