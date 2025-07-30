@@ -1,26 +1,28 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>チャレンジカレンダー</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>健康チャレンジ</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div id="goalInputContainer">
-    <h1>チャレンジ目標を入力してね⭐︎</h1>
-    <input type="text" id="goalInput" placeholder="目標を入力してね⭐︎" />
+  <div id="start-screen">
+    <h2>チャレンジ目標を入力してね⭐</h2>
+    <input type="text" id="goal-input" placeholder="目標を入力してね⭐︎" />
     <div class="start-buttons">
-      <button onclick="startChallenge(14)">きっずチャレンジ⭐︎14日間スタート</button>
-      <button onclick="startChallenge(30)">健康チャレンジ⭐︎30日間スタート</button>
+      <button id="start-14-btn">きっずチャレンジ⭐<br>14日間スタート</button>
+      <button id="start-30-btn">健康チャレンジ⭐<br>30日間スタート</button>
     </div>
   </div>
 
-  <div id="app" style="display: none;">
-    <div id="goalTextContainer"><strong>🌟 あなたの目標 🌟</strong><div id="goalText"></div></div>
-    <div id="calendar" class="calendar"></div>
-    <button id="markButton">今日のチャレンジ達成！</button>
-    <button id="submitBtn" disabled>応募フォームへ</button>
+  <div id="main-screen" style="display:none;">
+    <div id="goal-display"></div>
+    <div id="calendar"></div>
+    <button id="mark-button">今日のチャレンジ達成！</button>
+    <div class="submit-buttons">
+      <button id="submit-btn" disabled>応募フォームへ</button>
+    </div>
   </div>
 
   <script src="script.js"></script>
