@@ -3,38 +3,86 @@ body {
   text-align: center;
   margin: 0;
   padding: 0;
+  background: url('img/background.jpg') center center / cover no-repeat fixed;
 }
+
+#start-screen, #main-screen {
+  padding: 2rem;
+}
+
+#goal-input {
+  font-size: 1.2rem;
+  padding: 0.5rem;
+  width: 80%;
+  max-width: 300px;
+  margin-bottom: 1rem;
+}
+
+.mode-buttons button {
+  margin: 1rem;
+  font-size: 1.1rem;
+  padding: 0.8rem;
+}
+
+#goal-display {
+  font-size: 1.3rem;
+  margin-bottom: 1rem;
+}
+
 #calendar {
   display: grid;
-  grid-template-columns: repeat(7, 40px);
-  justify-content: center;
-  margin: 20px;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 5px;
+  padding: 1rem;
+  max-width: 400px;
+  margin: 0 auto;
 }
-.calendar-cell {
+
+.square {
   position: relative;
-  width: 40px;
-  height: 40px;
-  margin: 5px;
+  width: 100%;
+  padding-bottom: 100%;
+  background-color: white;
+  border-radius: 50%;
+  overflow: hidden;
 }
-.stamp {
+
+.square .stamp {
+  position: absolute;
   width: 100%;
   height: 100%;
-  background-image: url('heart.png');
-  background-size: cover;
+  background: url('img/heart.png') center center / contain no-repeat;
+  opacity: 0.7;
 }
-.cover {
+
+.square .mask {
   position: absolute;
-  top: 0; left: 0;
   width: 100%;
   height: 100%;
   background-color: white;
+  border-radius: 50%;
+  transition: opacity 0.3s;
 }
-.goal-title {
-  font-weight: bold;
-  margin-bottom: 4px;
+
+.mask.hidden {
+  opacity: 0;
 }
-.goal-text {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+
+#complete-button {
+  margin: 1rem auto;
+  font-size: 1.2rem;
+  padding: 1rem;
+  background: pink;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.submit-buttons {
+  margin-top: 1rem;
+}
+
+.submit-buttons button.disabled {
+  opacity: 0.5;
+  pointer-events: none;
 }
