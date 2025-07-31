@@ -1,27 +1,29 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
   <title>健康チャレンジ</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <div id="start-screen">
-    <h2>チャレンジ目標を入力してね⭐</h2>
-    <input type="text" id="goal-input" placeholder="目標を入力してね⭐︎" />
-    <div class="start-buttons">
-      <button id="start-14-btn">きっずチャレンジ⭐<br>14日間スタート</button>
-      <button id="start-30-btn">健康チャレンジ⭐<br>30日間スタート</button>
+    <h1>チャレンジ目標を入力してね🌟</h1>
+    <input type="text" id="goal-input" placeholder="目標を入力してね(20文字以内)" maxlength="20" />
+    <div class="mode-buttons">
+      <button onclick="startChallenge(14)">🌟きっずチャレンジ🌟<br>14日間スタート</button>
+      <button onclick="startChallenge(30)">🌟健康チャレンジ🌟<br>30日間スタート</button>
     </div>
   </div>
 
-  <div id="main-screen" style="display:none;">
-    <div id="goal-display"></div>
+  <div id="main-screen" class="hidden">
+    <div id="goal-display">
+      🌟 あなたの目標 🌟<br /><span id="goal-text"></span>
+    </div>
     <div id="calendar"></div>
-    <button id="mark-button">今日のチャレンジ達成！</button>
+    <button id="complete-button" onclick="markToday()">🎯今日のチャレンジ達成🎯</button>
     <div class="submit-buttons">
-      <button id="submit-btn" disabled>応募フォームへ</button>
+      <button id="submit-button" class="disabled" disabled>🤸‍♀️応募フォームへ🤸‍♀️</button>
     </div>
   </div>
 
