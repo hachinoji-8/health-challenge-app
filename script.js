@@ -1,118 +1,161 @@
-document.addEventListener("DOMContentLoaded", () => {
-  const goalInput = document.getElementById("goal-input");
-  const start14Btn = document.getElementById("start-14-btn");
-  const start30Btn = document.getElementById("start-30-btn");
-  const goalDisplay = document.getElementById("goal-display");
-  const calendar = document.getElementById("calendar");
-  const markButton = document.getElementById("mark-button");
-  const submitBtn = document.getElementById("submit-btn");
-  const startScreen = document.getElementById("start-screen");
-  const mainScreen = document.getElementById("main-screen");
+const calendar = document.getElementById("calendar");
+const completeButton = document.getElementById("complete-button");
+const submitButton = document.getElementById("submit-button");
+const goalInput = document.getElementById("goal-input");
+const goalText = document.getElementById("goal-text");
+const startScreen = document.getElementById("start-screen");
+const mainScreen = document.getElementById("main-screen");
 
-  let markedDays = JSON.parse(localStorage.getItem("markedDays")) || [];
-  let totalDays = parseInt(localStorage.getItem("totalDays")) || 30;
-  let goal = localStorage.getItem("goal") || "";
-  let startDate = localStorage.getItem("startDate");
+let totalDays = 30;
+let completedDays = 0;
+let currentMode = 30; // default mode
+let manualMode = false;
+let clickCountMap = {};
 
-  const renderGoal = () => {
-    if (goal) {
-      goalDisplay.innerHTML = `<div class="goal-title">🌟 あなたの目標 🌟</div><div class="goal-text">${goal}</div>`;
-    }
-  };
+function startChallenge(mode) {
+const goal = goalInput.value.trim();
+if (!goal) return;
 
-  const renderCalendar = () => {
-    calendar.innerHTML = "";
-    for (let i = 1; i <= totalDays; i++) {
-      const cell = document.createElement("div");
-      cell.className = "calendar-cell";
-      const stamp = document.createElement("div");
-      stamp.className = "stamp";
-      const cover = document.createElement("div");
-      cover.className = "cover";
-      if (markedDays.includes(i)) {
-        cover.style.display = "none";
-      }
-      cell.appendChild(stamp);
-      cell.appendChild(cover);
-      calendar.appendChild(cell);
-    }
-  };
+currentMode = mode;
+totalDays = mode;
+localStorage.setItem("goal", goal);
+localStorage.setItem("mode", mode);
+localStorage.setItem("startDate", new Date().toDateString());
+localStorage.setItem("record", JSON.stringify([]));
 
-  const updateStorage = () => {
-    localStorage.setItem("markedDays", JSON.stringify(markedDays));
-  };
+goalText.textContent = goal;
+startScreen.classList.add("hidden");
+mainScreen.classList.remove("hidden");
 
-  const canMarkToday = () => {
-    const today = new Date().toDateString();
-    if (!startDate) {
-      localStorage.setItem("startDate", today);
-      return true;
-    }
-    const lastMarked = localStorage.getItem("lastMarked") || "";
-    return today !== lastMarked;
-  };
+generateCalendar();
+updateCalendarUI();
+}
 
-  const markToday = () => {
-    const today = new Date().toDateString();
-    const next = markedDays.length + 1;
-    if (next <= totalDays) {
-      markedDays.push(next);
-      updateStorage();
-      localStorage.setItem("lastMarked", today);
-      renderCalendar();
-      if (markedDays.length >= totalDays) {
-        submitBtn.disabled = false;
-      }
-    }
-  };
+function generateCalendar() {
+calendar.innerHTML = "";
+for (let i = 0; i < totalDays; i++) {
+const square = document.createElement("div");
+square.className = "square";
+square.dataset.index = i;
 
-  markButton.addEventListener("click", () => {
-    if (canMarkToday()) {
-      markToday();
-    } else {
-      alert("今日はすでに達成済みです！");
-    }
-  });
+const stamp = document.createElement("div");
+stamp.className = "stamp";
 
-  start14Btn.addEventListener("click", () => {
-    const inputGoal = goalInput.value.trim();
-    if (inputGoal) {
-      goal = inputGoal;
-      totalDays = 14;
-      localStorage.setItem("goal", goal);
-      localStorage.setItem("totalDays", totalDays);
-      localStorage.setItem("markedDays", JSON.stringify([]));
-      localStorage.removeItem("lastMarked");
-      localStorage.removeItem("startDate");
-      startScreen.style.display = "none";
-      mainScreen.style.display = "block";
-      renderGoal();
-      renderCalendar();
-    }
-  });
+const mask = document.createElement("div");
+mask.className = "mask";
 
-  start30Btn.addEventListener("click", () => {
-    const inputGoal = goalInput.value.trim();
-    if (inputGoal) {
-      goal = inputGoal;
-      totalDays = 30;
-      localStorage.setItem("goal", goal);
-      localStorage.setItem("totalDays", totalDays);
-      localStorage.setItem("markedDays", JSON.stringify([]));
-      localStorage.removeItem("lastMarked");
-      localStorage.removeItem("startDate");
-      startScreen.style.display = "none";
-      mainScreen.style.display = "block";
-      renderGoal();
-      renderCalendar();
-    }
-  });
+square.appendChild(stamp);
+square.appendChild(mask);
+calendar.appendChild(square);
 
-  if (goal) {
-    startScreen.style.display = "none";
-    mainScreen.style.display = "block";
-    renderGoal();
-    renderCalendar();
-  }
+square.addEventListener("click", () => onSquareClick(i));
+}
+}
+
+function onSquareClick(index) {
+if (!manualMode) return;
+
+let record = JSON.parse(localStorage.getItem("record") || "[]");
+if (!record.includes(index)) {
+record.push(index);
+} else {
+record = record.filter(i => i !== index);
+}
+localStorage.setItem("record", JSON.stringify(record));
+updateCalendarUI();
+}
+
+function markToday() {
+if (!canMarkToday()) return;
+
+let record = JSON.parse(localStorage.getItem("record") || "[]");
+const todayIndex = record.length;
+record.push(todayIndex);
+localStorage.setItem("record", JSON.stringify(record));
+localStorage.setItem("lastMarked", new Date().toDateString());
+updateCalendarUI();
+}
+
+function canMarkToday() {
+const last = localStorage.getItem("lastMarked");
+const today = new Date().toDateString();
+return last !== today;
+}
+
+function updateCalendarUI() {
+const record = JSON.parse(localStorage.getItem("record") || "[]");
+document.querySelectorAll(".square").forEach((el, i) => {
+const mask = el.querySelector(".mask");
+mask.classList.toggle("hidden", record.includes(i));
 });
 
+const valid = record.length >= currentMode;
+submitButton.classList.toggle("disabled", !valid);
+submitButton.disabled = !valid;
+submitButton.onclick = () => {
+const url =
+currentMode === 14
+? "https://example.com/form14"
+: "https://example.com/form30";
+window.open(url, "_blank");
+};
+}
+
+// 隠しコマンド：マス内の角クリックで回数カウント
+calendar.addEventListener("click", (e) => {
+const square = e.target.closest(".square");
+if (!square) return;
+
+const rect = square.getBoundingClientRect();
+const x = e.clientX - rect.left;
+const y = e.clientY - rect.top;
+
+const key = getCornerKey(x, y, rect.width, rect.height);
+if (!key) return;
+
+clickCountMap[key] = (clickCountMap[key] || 0) + 1;
+
+if (key === "bottomRight" && clickCountMap[key] === 15) {
+manualMode = true;
+alert("🛠 マニュアル記録モードに切り替えました");
+}
+if (key === "topLeft" && clickCountMap[key] === 15) {
+manualMode = false;
+alert("↩ 通常モードに戻しました");
+}
+if (key === "topRight" && clickCountMap[key] === 15) {
+localStorage.removeItem("goal");
+localStorage.removeItem("record");
+localStorage.removeItem("startDate");
+localStorage.removeItem("lastMarked");
+localStorage.removeItem("mode");
+location.reload();
+}
+});
+
+function getCornerKey(x, y, width, height) {
+const zone = 0.3;
+const cornerSize = Math.min(width, height) * zone;
+
+if (x < cornerSize && y < cornerSize) return "topLeft";
+if (x > width - cornerSize && y < cornerSize) return "topRight";
+if (x > width - cornerSize && y > height - cornerSize) return "bottomRight";
+return null;
+}
+
+// 初期化
+window.onload = () => {
+const savedGoal = localStorage.getItem("goal");
+const savedMode = localStorage.getItem("mode");
+
+if (savedGoal && savedMode) {
+goalText.textContent = savedGoal;
+currentMode = Number(savedMode);
+totalDays = currentMode;
+
+startScreen.classList.add("hidden");
+mainScreen.classList.remove("hidden");
+generateCalendar();
+updateCalendarUI();
+}
+};
