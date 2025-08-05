@@ -10,6 +10,10 @@ body {
   padding: 2rem;
 }
 
+.hidden {
+  display: none;
+}
+
 #goal-input {
   font-size: 1.2rem;
   padding: 0.5rem;
@@ -43,10 +47,9 @@ body {
   position: relative;
   width: 100%;
   padding-bottom: 100%;
-  background-color: white;
   border-radius: 50%;
-  overflow: hidden;
   border: 2px solid black;
+  overflow: hidden;
 }
 
 .square .stamp {
