@@ -31,6 +31,11 @@ function startChallenge(mode) {
 
   generateCalendar();
   updateCalendarUI();
+
+  // ✅ DOMが表示された後にイベント登録！
+  setTimeout(() => {
+    document.getElementById("goal-text")?.addEventListener("click", handleGoalTap);
+  }, 0);
 }
 
 function generateCalendar() {
@@ -51,7 +56,7 @@ function generateCalendar() {
     calendar.appendChild(square);
 
     square.addEventListener("click", () => onSquareClick(i));
-    square.addEventListener("click", handleCalendarTap); // ← 一日目連打用
+    square.addEventListener("click", handleCalendarTap);
   }
 }
 
@@ -104,7 +109,6 @@ function updateCalendarUI() {
   };
 }
 
-// 🔁 目標文字連打 → モード切替
 function handleGoalTap() {
   const now = Date.now();
   goalTapTimes.push(now);
@@ -119,7 +123,6 @@ function handleGoalTap() {
   }
 }
 
-// ⏪ 1日目〇連打 → 登録画面へ戻る
 function handleCalendarTap(e) {
   const square = e.target.closest(".square");
   if (!square || square.dataset.index !== "0") return;
@@ -135,7 +138,6 @@ function handleCalendarTap(e) {
   }
 }
 
-// 初期化
 window.addEventListener("load", () => {
   const savedGoal = localStorage.getItem("goal");
   const savedMode = localStorage.getItem("mode");
@@ -150,7 +152,10 @@ window.addEventListener("load", () => {
 
     generateCalendar();
     updateCalendarUI();
-  }
 
-  goalText.addEventListener("click", handleGoalTap); // ← ここでタップ検知登録！
+    // ✅ 初期ロード時にもイベント登録！
+    setTimeout(() => {
+      document.getElementById("goal-text")?.addEventListener("click", handleGoalTap);
+    }, 0);
+  }
 });
