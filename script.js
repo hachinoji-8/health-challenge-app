@@ -10,6 +10,7 @@ let totalDays = 30;
 let currentDay = new Date().toDateString();
 let manualMode = false;
 
+// チャレンジ開始（14日または30日）
 function startChallenge(days) {
   const goal = goalInput.value.trim();
   if (!goal) return;
@@ -29,6 +30,7 @@ function startChallenge(days) {
   updateCalendarUI();
 }
 
+// カレンダー生成
 function generateCalendar() {
   calendar.innerHTML = "";
   for (let i = 0; i < totalDays; i++) {
@@ -51,20 +53,28 @@ function generateCalendar() {
   }
 }
 
+// カレンダーUI更新（マスク・スタンプ光）
 function updateCalendarUI() {
   const record = JSON.parse(localStorage.getItem("record") || "[]");
 
   document.querySelectorAll(".square").forEach((el, i) => {
     const mask = el.querySelector(".mask");
-    mask.classList.toggle("hidden", record.includes(i));
     const stamp = el.querySelector(".stamp");
-    stamp.classList.toggle("glow", record.includes(i));
+
+    if (record.includes(i)) {
+      mask.classList.add("hidden");
+      stamp.classList.add("glow");
+    } else {
+      mask.classList.remove("hidden");
+      stamp.classList.remove("glow");
+    }
   });
 
   submitButton.disabled = record.length < totalDays;
   submitButton.classList.toggle("disabled", submitButton.disabled);
 }
 
+// 自動達成（1日1回まで）
 function markToday() {
   if (!canMarkToday()) return;
 
@@ -79,12 +89,14 @@ function markToday() {
   }
 }
 
+// 今日の達成が可能か判定
 function canMarkToday() {
   const last = localStorage.getItem("lastMarked");
   const today = new Date().toDateString();
   return !manualMode && last !== today;
 }
 
+// カレンダーをタップしたとき（手動モード）
 function handleCalendarTap(event) {
   const square = event.target.closest(".square");
   if (!square) return;
@@ -105,6 +117,7 @@ function handleCalendarTap(event) {
   updateCalendarUI();
 }
 
+// 目標のテキストを変更する
 function handleGoalTap() {
   const newGoal = prompt("新しい目標を入力してください", goalText.textContent);
   if (newGoal) {
@@ -113,7 +126,7 @@ function handleGoalTap() {
   }
 }
 
-// 深夜0時を超えたらモード解除＆ボタン復活
+// 深夜チェックでモードリセット
 setInterval(() => {
   const now = new Date().toDateString();
   if (now !== currentDay) {
