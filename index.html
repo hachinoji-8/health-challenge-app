@@ -7,17 +7,17 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <!-- 🌱 目標登録画面 -->
+  <!-- 目標登録画面 -->
   <div id="start-screen">
     <h1>チャレンジ目標を入力してね🌟</h1>
     <input type="text" id="goal-input" placeholder="目標を入力してね(20文字以内)" maxlength="20" />
     <div class="mode-buttons">
-      <button onclick="startChallenge(14)">🌟きっずチャレンジ🌟<br>14日間スタート🔥</button>
-      <button onclick="startChallenge(30)">🌟健康チャレンジ🌟<br>30日間スタート🔥</button>
+      <button onclick="startChallenge(14)">🌟きっずチャレンジ🌟<br>14日間スタート</button>
+      <button onclick="startChallenge(30)">🌟健康チャレンジ🌟<br>30日間スタート</button>
     </div>
   </div>
 
-  <!-- 📅 カレンダー画面 -->
+  <!-- カレンダー画面 -->
   <div id="main-screen" class="hidden">
     <div id="goal-display" onclick="handleGoalTap()">
       🌟 あなたの目標 🌟<br /><span id="goal-text"></span>
