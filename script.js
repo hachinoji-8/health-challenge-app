@@ -147,19 +147,6 @@ window.onload = () => {
     mainScreen.classList.remove("hidden");
     generateCalendar();
     updateCalendarUI();
-    window.onload = () => {
-  const savedGoal = localStorage.getItem("goal");
-  const savedMode = localStorage.getItem("mode");
-
-  if (savedGoal && savedMode) {
-    goalText.textContent = savedGoal;
-    currentMode = Number(savedMode);
-    totalDays = currentMode;
-
-    startScreen.classList.add("hidden");
-    mainScreen.classList.remove("hidden");
-    generateCalendar();
-    updateCalendarUI();
   }
 };
 
