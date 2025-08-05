@@ -9,9 +9,7 @@ const mainScreen = document.getElementById("main-screen");
 let totalDays = 30;
 let currentMode = 30;
 let manualMode = false;
-
-let goalTapTimes = [];
-let dayOneTapTimes = [];
+let currentDay = new Date().toDateString();
 
 function playSuccessSound() {
   const sound = new Audio("img/success.mp3");
@@ -29,6 +27,7 @@ function startChallenge(mode) {
   localStorage.setItem("mode", mode);
   localStorage.setItem("startDate", new Date().toDateString());
   localStorage.setItem("record", JSON.stringify([]));
+  localStorage.setItem("lastMarked", "");
 
   goalText.textContent = goal;
   startScreen.classList.add("hidden");
@@ -47,14 +46,12 @@ function generateCalendar() {
 
     const stamp = document.createElement("div");
     stamp.className = "stamp";
-
-    // 7の倍数はsmile.png、それ以外はheart.png（初期は全部設置）
     const imgName = (i + 1) % 7 === 0 ? "smile.png" : "heart.png";
     stamp.style.backgroundImage = `url('img/${imgName}')`;
 
     const mask = document.createElement("div");
     mask.className = "mask";
-    mask.id = `mask-${i}`; // 識別用
+    mask.id = `mask-${i}`;
 
     square.appendChild(stamp);
     square.appendChild(mask);
@@ -65,42 +62,67 @@ function generateCalendar() {
 }
 
 function onSquareClick(index) {
-  if (!manualMode) return;
+  manualMode = true;
+  completeButton.disabled = true;
 
   const record = [];
   for (let i = 0; i <= index; i++) {
     record.push(i);
   }
   localStorage.setItem("record", JSON.stringify(record));
-  playSuccessSound();
   updateCalendarUI();
+  playSuccessSound();
 }
 
 function markToday() {
   if (!canMarkToday()) return;
 
-  let record = JSON.parse(localStorage.getItem("record") || "[]");
+  const record = JSON.parse(localStorage.getItem("record") || "[]");
   const todayIndex = record.length;
   if (todayIndex < currentMode) {
     record.push(todayIndex);
     localStorage.setItem("record", JSON.stringify(record));
     localStorage.setItem("lastMarked", new Date().toDateString());
-    playSuccessSound();
     updateCalendarUI();
+    playSuccessSound();
+    completeButton.disabled = true;
   }
 }
 
 function canMarkToday() {
   const last = localStorage.getItem("lastMarked");
   const today = new Date().toDateString();
-  return last !== today;
+  return !manualMode && last !== today;
 }
 
 function updateCalendarUI() {
   const record = JSON.parse(localStorage.getItem("record") || "[]");
   const lastIndex = record.length - 1;
-  const allCompleted = record.length >= currentMode;
 
   document.querySelectorAll(".square").forEach((el, i) => {
     const mask = el.querySelector(".mask");
-    const stamp = el.query
+    if (record.includes(i)) {
+      mask.classList.remove("mask");
+    } else {
+      mask.classList.add("mask");
+    }
+  });
+
+  // すべて達成済みなら応募ボタンを有効化
+  if (record.length >= currentMode) {
+    submitButton.disabled = false;
+  }
+}
+
+// 日付が変わったらモードを自動に戻す＆ボタン再有効化
+setInterval(() => {
+  const today = new Date().toDateString();
+  if (today !== currentDay) {
+    currentDay = today;
+    manualMode = false;
+    completeButton.disabled = false;
+    localStorage.setItem("lastMarked", ""); // リセット
+  }
+}, 60000); // 毎分チェック
+
+    
