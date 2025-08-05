@@ -100,19 +100,14 @@ function updateCalendarUI() {
 
   document.querySelectorAll(".square").forEach((el, i) => {
     const mask = el.querySelector(".masked");
-    if (record.includes(i)) {
-      mask.style.display = "none"; // 達成ならマスクを非表示
-    } else {
-      mask.style.display = "block"; // 未達成なら表示
-    }
+    mask.style.display = record.includes(i) ? "none" : "block";
   });
 
-  if (record.length >= currentMode) {
-    submitButton.disabled = false;
-  }
+  submitButton.disabled = record.length < currentMode;
+  submitButton.classList.toggle("disabled", submitButton.disabled);
 }
 
-// 日付が変わったらモードリセット＆ボタン復活
+// 深夜0時を超えたらモード解除＆ボタン復活
 setInterval(() => {
   const today = new Date().toDateString();
   if (today !== currentDay) {
@@ -122,5 +117,3 @@ setInterval(() => {
     localStorage.setItem("lastMarked", "");
   }
 }, 60000); // 毎分チェック
-
-    
