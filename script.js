@@ -124,5 +124,6 @@ setInterval(() => {
     localStorage.setItem("lastMarked", ""); // リセット
   }
 }, 60000); // 毎分チェック
+}
 
     
