@@ -6,12 +6,12 @@ body {
   background: url('img/background.jpg') center center / cover no-repeat fixed;
 }
 
-#start-screen, #main-screen {
-  padding: 2rem;
-}
-
 .hidden {
   display: none;
+}
+
+#start-screen, #main-screen {
+  padding: 2rem;
 }
 
 #goal-input {
