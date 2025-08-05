@@ -14,7 +14,7 @@ let currentDay = new Date().toDateString();
 function playSuccessSound() {
   const sound = new Audio("img/success.mp3");
   sound.currentTime = 0;
-  sound.play();
+  sound.play().catch(e => console.warn("音声再生失敗:", e));
 }
 
 function startChallenge(mode) {
@@ -50,7 +50,7 @@ function generateCalendar() {
     stamp.style.backgroundImage = `url('img/${imgName}')`;
 
     const mask = document.createElement("div");
-    mask.className = "mask";
+    mask.className = "masked";
     mask.id = `mask-${i}`;
 
     square.appendChild(stamp);
@@ -97,33 +97,30 @@ function canMarkToday() {
 
 function updateCalendarUI() {
   const record = JSON.parse(localStorage.getItem("record") || "[]");
-  const lastIndex = record.length - 1;
 
   document.querySelectorAll(".square").forEach((el, i) => {
-    const mask = el.querySelector(".mask");
+    const mask = el.querySelector(".masked");
     if (record.includes(i)) {
-      mask.classList.remove("mask");
+      mask.style.display = "none"; // 達成ならマスクを非表示
     } else {
-      mask.classList.add("mask");
+      mask.style.display = "block"; // 未達成なら表示
     }
   });
 
-  // すべて達成済みなら応募ボタンを有効化
   if (record.length >= currentMode) {
     submitButton.disabled = false;
   }
 }
 
-// 日付が変わったらモードを自動に戻す＆ボタン再有効化
+// 日付が変わったらモードリセット＆ボタン復活
 setInterval(() => {
   const today = new Date().toDateString();
   if (today !== currentDay) {
     currentDay = today;
     manualMode = false;
     completeButton.disabled = false;
-    localStorage.setItem("lastMarked", ""); // リセット
+    localStorage.setItem("lastMarked", "");
   }
 }, 60000); // 毎分チェック
-
 
     
