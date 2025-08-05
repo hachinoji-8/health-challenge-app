@@ -2,28 +2,32 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>30日チャレンジ</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <title>健康チャレンジ</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <!-- 🎯 目標登録画面 -->
-  <div id="goalPage" class="page visible">
-    <h1>目標を登録しよう！</h1>
-    <input type="text" placeholder="目標を入力..." />
-    <button onclick="goToCalendar()">スタート！</button>
+  <!-- 🌱 目標登録画面 -->
+  <div id="start-screen">
+    <h1>チャレンジ目標を入力してね🌟</h1>
+    <input type="text" id="goal-input" placeholder="目標を入力してね(20文字以内)" maxlength="20" />
+    <div class="mode-buttons">
+      <button onclick="startChallenge(14)">🌟きっずチャレンジ🌟<br>14日間スタート🔥</button>
+      <button onclick="startChallenge(30)">🌟健康チャレンジ🌟<br>30日間スタート🔥</button>
+    </div>
   </div>
 
   <!-- 📅 カレンダー画面 -->
-  <div id="calendarPage" class="page hidden">
-    <h2>30日チャレンジ🔥</h2>
-    <div class="stamp-grid"></div>
-    <input id="urlInput" type="text" placeholder="達成したURLを入力" />
-    <button id="submitBtn" disabled onclick="submitChallenge()">応募する</button>
+  <div id="main-screen" class="hidden">
+    <div id="goal-display" onclick="handleGoalTap()">
+      🌟 あなたの目標 🌟<br /><span id="goal-text"></span>
+    </div>
+    <div id="calendar" onclick="handleCalendarTap(event)"></div>
+    <button id="complete-button" onclick="markToday()">🎯今日のチャレンジ達成🎯</button>
+    <div class="submit-buttons">
+      <button id="submit-button" class="disabled" disabled>🤸‍♀️応募フォームへ🤸‍♀️</button>
+    </div>
   </div>
-
-  <!-- 🔊 サウンド素材 -->
-  <audio id="soundEffect" src="success.mp3" preload="auto"></audio>
 
   <script src="script.js"></script>
 </body>
