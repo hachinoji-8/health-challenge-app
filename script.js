@@ -7,24 +7,16 @@ const startScreen = document.getElementById("start-screen");
 const mainScreen = document.getElementById("main-screen");
 
 let totalDays = 30;
-let currentMode = 30;
-let manualMode = false;
 let currentDay = new Date().toDateString();
+let manualMode = false;
 
-function playSuccessSound() {
-  const sound = new Audio("img/success.mp3");
-  sound.currentTime = 0;
-  sound.play().catch(e => console.warn("音声再生失敗:", e));
-}
-
-function startChallenge(mode) {
+function startChallenge(days) {
   const goal = goalInput.value.trim();
   if (!goal) return;
 
-  currentMode = mode;
-  totalDays = mode;
+  totalDays = days;
   localStorage.setItem("goal", goal);
-  localStorage.setItem("mode", mode);
+  localStorage.setItem("days", days);
   localStorage.setItem("startDate", new Date().toDateString());
   localStorage.setItem("record", JSON.stringify([]));
   localStorage.setItem("lastMarked", "");
@@ -46,32 +38,31 @@ function generateCalendar() {
 
     const stamp = document.createElement("div");
     stamp.className = "stamp";
-    const imgName = (i + 1) % 7 === 0 ? "smile.png" : "heart.png";
-    stamp.style.backgroundImage = `url('img/${imgName}')`;
+    const img = (i + 1) % 7 === 0 ? "smile.png" : "heart.png";
+    stamp.style.backgroundImage = `url('img/${img}')`;
 
     const mask = document.createElement("div");
-    mask.className = "masked";
+    mask.className = "mask";
     mask.id = `mask-${i}`;
 
     square.appendChild(stamp);
     square.appendChild(mask);
     calendar.appendChild(square);
-
-    square.addEventListener("click", () => onSquareClick(i));
   }
 }
 
-function onSquareClick(index) {
-  manualMode = true;
-  completeButton.disabled = true;
+function updateCalendarUI() {
+  const record = JSON.parse(localStorage.getItem("record") || "[]");
 
-  const record = [];
-  for (let i = 0; i <= index; i++) {
-    record.push(i);
-  }
-  localStorage.setItem("record", JSON.stringify(record));
-  updateCalendarUI();
-  playSuccessSound();
+  document.querySelectorAll(".square").forEach((el, i) => {
+    const mask = el.querySelector(".mask");
+    mask.classList.toggle("hidden", record.includes(i));
+    const stamp = el.querySelector(".stamp");
+    stamp.classList.toggle("glow", record.includes(i));
+  });
+
+  submitButton.disabled = record.length < totalDays;
+  submitButton.classList.toggle("disabled", submitButton.disabled);
 }
 
 function markToday() {
@@ -79,12 +70,11 @@ function markToday() {
 
   const record = JSON.parse(localStorage.getItem("record") || "[]");
   const todayIndex = record.length;
-  if (todayIndex < currentMode) {
+  if (todayIndex < totalDays) {
     record.push(todayIndex);
     localStorage.setItem("record", JSON.stringify(record));
     localStorage.setItem("lastMarked", new Date().toDateString());
     updateCalendarUI();
-    playSuccessSound();
     completeButton.disabled = true;
   }
 }
@@ -95,23 +85,39 @@ function canMarkToday() {
   return !manualMode && last !== today;
 }
 
-function updateCalendarUI() {
-  const record = JSON.parse(localStorage.getItem("record") || "[]");
+function handleCalendarTap(event) {
+  const square = event.target.closest(".square");
+  if (!square) return;
 
-  document.querySelectorAll(".square").forEach((el, i) => {
-    const mask = el.querySelector(".masked");
-    mask.style.display = record.includes(i) ? "none" : "block";
-  });
+  const index = parseInt(square.dataset.index);
+  if (isNaN(index)) return;
 
-  submitButton.disabled = record.length < currentMode;
-  submitButton.classList.toggle("disabled", submitButton.disabled);
+  manualMode = true;
+  completeButton.disabled = true;
+
+  const record = [];
+  for (let i = 0; i <= index; i++) {
+    record.push(i);
+  }
+
+  localStorage.setItem("record", JSON.stringify(record));
+  localStorage.setItem("lastMarked", currentDay);
+  updateCalendarUI();
+}
+
+function handleGoalTap() {
+  const newGoal = prompt("新しい目標を入力してください", goalText.textContent);
+  if (newGoal) {
+    goalText.textContent = newGoal;
+    localStorage.setItem("goal", newGoal);
+  }
 }
 
 // 深夜0時を超えたらモード解除＆ボタン復活
 setInterval(() => {
-  const today = new Date().toDateString();
-  if (today !== currentDay) {
-    currentDay = today;
+  const now = new Date().toDateString();
+  if (now !== currentDay) {
+    currentDay = now;
     manualMode = false;
     completeButton.disabled = false;
     localStorage.setItem("lastMarked", "");
