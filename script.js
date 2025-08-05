@@ -32,7 +32,6 @@ function startChallenge(mode) {
   generateCalendar();
   updateCalendarUI();
 
-  // ✅ DOMが表示された後にイベント登録！
   setTimeout(() => {
     document.getElementById("goal-text")?.addEventListener("click", handleGoalTap);
   }, 0);
@@ -64,11 +63,13 @@ function onSquareClick(index) {
   if (!manualMode) return;
 
   let record = JSON.parse(localStorage.getItem("record") || "[]");
+
   if (!record.includes(index)) {
     record.push(index);
   } else {
     record = record.filter(i => i !== index);
   }
+
   localStorage.setItem("record", JSON.stringify(record));
   updateCalendarUI();
 }
@@ -81,6 +82,7 @@ function markToday() {
   record.push(todayIndex);
   localStorage.setItem("record", JSON.stringify(record));
   localStorage.setItem("lastMarked", new Date().toDateString());
+
   updateCalendarUI();
 }
 
@@ -92,9 +94,35 @@ function canMarkToday() {
 
 function updateCalendarUI() {
   const record = JSON.parse(localStorage.getItem("record") || "[]");
+  const latestMarked = record.length ? Math.max(...record) : -1;
+
   document.querySelectorAll(".square").forEach((el, i) => {
     const mask = el.querySelector(".mask");
-    mask.classList.toggle("hidden", record.includes(i));
+    const stamp = el.querySelector(".stamp");
+
+    const isMarked = record.includes(i);
+
+    // PNG表示処理
+    if (isMarked) {
+      mask.classList.add("hidden");
+      stamp.style.backgroundImage = "url('img/stamp.png')";
+      stamp.classList.add("glow");
+    } else {
+      stamp.style.backgroundImage = "";
+      stamp.classList.remove("glow");
+
+      if (manualMode) {
+        if (i <= latestMarked) {
+          // 白〇除去（過去分）
+          mask.classList.add("hidden");
+        } else {
+          // 白〇復活（未来分）
+          mask.classList.remove("hidden");
+        }
+      } else {
+        mask.classList.remove("hidden"); // 通常モードでは全未達成〇表示
+      }
+    }
   });
 
   const valid = record.length >= currentMode;
@@ -120,6 +148,7 @@ function handleGoalTap() {
 
     alert(manualMode ? "🛠 手動モードに切り替えました" : "↩ 通常モードに戻しました");
     completeButton.disabled = manualMode;
+    updateCalendarUI(); // ← モード切替に応じてUI更新
   }
 }
 
@@ -153,7 +182,6 @@ window.addEventListener("load", () => {
     generateCalendar();
     updateCalendarUI();
 
-    // ✅ 初期ロード時にもイベント登録！
     setTimeout(() => {
       document.getElementById("goal-text")?.addEventListener("click", handleGoalTap);
     }, 0);
