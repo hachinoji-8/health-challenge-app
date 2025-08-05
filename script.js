@@ -10,152 +10,141 @@ let totalDays = 30;
 let completedDays = 0;
 let currentMode = 30; // default mode
 let manualMode = false;
-let clickCountMap = {};
+
+// タップ記録用
+let goalTapTimes = [];
+let dayOneTapTimes = [];
 
 function startChallenge(mode) {
-const goal = goalInput.value.trim();
-if (!goal) return;
+  const goal = goalInput.value.trim();
+  if (!goal) return;
 
-currentMode = mode;
-totalDays = mode;
-localStorage.setItem("goal", goal);
-localStorage.setItem("mode", mode);
-localStorage.setItem("startDate", new Date().toDateString());
-localStorage.setItem("record", JSON.stringify([]));
+  currentMode = mode;
+  totalDays = mode;
+  localStorage.setItem("goal", goal);
+  localStorage.setItem("mode", mode);
+  localStorage.setItem("startDate", new Date().toDateString());
+  localStorage.setItem("record", JSON.stringify([]));
 
-goalText.textContent = goal;
-startScreen.classList.add("hidden");
-mainScreen.classList.remove("hidden");
+  goalText.textContent = goal;
+  startScreen.classList.add("hidden");
+  mainScreen.classList.remove("hidden");
 
-generateCalendar();
-updateCalendarUI();
+  generateCalendar();
+  updateCalendarUI();
 }
 
 function generateCalendar() {
-calendar.innerHTML = "";
-for (let i = 0; i < totalDays; i++) {
-const square = document.createElement("div");
-square.className = "square";
-square.dataset.index = i;
+  calendar.innerHTML = "";
+  for (let i = 0; i < totalDays; i++) {
+    const square = document.createElement("div");
+    square.className = "square";
+    square.dataset.index = i;
 
-const stamp = document.createElement("div");
-stamp.className = "stamp";
+    const stamp = document.createElement("div");
+    stamp.className = "stamp";
 
-const mask = document.createElement("div");
-mask.className = "mask";
+    const mask = document.createElement("div");
+    mask.className = "mask";
 
-square.appendChild(stamp);
-square.appendChild(mask);
-calendar.appendChild(square);
+    square.appendChild(stamp);
+    square.appendChild(mask);
+    calendar.appendChild(square);
 
-square.addEventListener("click", () => onSquareClick(i));
-}
+    square.addEventListener("click", () => onSquareClick(i));
+  }
 }
 
 function onSquareClick(index) {
-if (!manualMode) return;
+  if (!manualMode) return;
 
-let record = JSON.parse(localStorage.getItem("record") || "[]");
-if (!record.includes(index)) {
-record.push(index);
-} else {
-record = record.filter(i => i !== index);
-}
-localStorage.setItem("record", JSON.stringify(record));
-updateCalendarUI();
+  let record = JSON.parse(localStorage.getItem("record") || "[]");
+  if (!record.includes(index)) {
+    record.push(index);
+  } else {
+    record = record.filter(i => i !== index);
+  }
+  localStorage.setItem("record", JSON.stringify(record));
+  updateCalendarUI();
 }
 
 function markToday() {
-if (!canMarkToday()) return;
+  if (!canMarkToday()) return;
 
-let record = JSON.parse(localStorage.getItem("record") || "[]");
-const todayIndex = record.length;
-record.push(todayIndex);
-localStorage.setItem("record", JSON.stringify(record));
-localStorage.setItem("lastMarked", new Date().toDateString());
-updateCalendarUI();
+  let record = JSON.parse(localStorage.getItem("record") || "[]");
+  const todayIndex = record.length;
+  record.push(todayIndex);
+  localStorage.setItem("record", JSON.stringify(record));
+  localStorage.setItem("lastMarked", new Date().toDateString());
+  updateCalendarUI();
 }
 
 function canMarkToday() {
-const last = localStorage.getItem("lastMarked");
-const today = new Date().toDateString();
-return last !== today;
+  const last = localStorage.getItem("lastMarked");
+  const today = new Date().toDateString();
+  return last !== today;
 }
 
 function updateCalendarUI() {
-const record = JSON.parse(localStorage.getItem("record") || "[]");
-document.querySelectorAll(".square").forEach((el, i) => {
-const mask = el.querySelector(".mask");
-mask.classList.toggle("hidden", record.includes(i));
-});
+  const record = JSON.parse(localStorage.getItem("record") || "[]");
+  document.querySelectorAll(".square").forEach((el, i) => {
+    const mask = el.querySelector(".mask");
+    mask.classList.toggle("hidden", record.includes(i));
+  });
 
-const valid = record.length >= currentMode;
-submitButton.classList.toggle("disabled", !valid);
-submitButton.disabled = !valid;
-submitButton.onclick = () => {
-const url =
-currentMode === 14
-? "https://example.com/form14"
-: "https://example.com/form30";
-window.open(url, "_blank");
-};
+  const valid = record.length >= currentMode;
+  submitButton.classList.toggle("disabled", !valid);
+  submitButton.disabled = !valid;
+  submitButton.onclick = () => {
+    const url =
+      currentMode === 14
+        ? "https://example.com/form14"
+        : "https://example.com/form30";
+    window.open(url, "_blank");
+  };
 }
 
-// 隠しコマンド：マス内の角クリックで回数カウント
-calendar.addEventListener("click", (e) => {
-const square = e.target.closest(".square");
-if (!square) return;
+// 🔁 目標文字連打 → モード切替
+function handleGoalTap() {
+  const now = Date.now();
+  goalTapTimes.push(now);
+  goalTapTimes = goalTapTimes.filter(t => now - t < 5000);
 
-const rect = square.getBoundingClientRect();
-const x = e.clientX - rect.left;
-const y = e.clientY - rect.top;
-
-const key = getCornerKey(x, y, rect.width, rect.height);
-if (!key) return;
-
-clickCountMap[key] = (clickCountMap[key] || 0) + 1;
-
-if (key === "bottomRight" && clickCountMap[key] === 15) {
-manualMode = true;
-alert("🛠 マニュアル記録モードに切り替えました");
+  if (goalTapTimes.length >= 10) {
+    manualMode = !manualMode;
+    goalTapTimes = [];
+    alert(manualMode ? "🛠 手動モードに切り替えました" : "↩ 通常モードに戻しました");
+  }
 }
-if (key === "topLeft" && clickCountMap[key] === 15) {
-manualMode = false;
-alert("↩ 通常モードに戻しました");
-}
-if (key === "topRight" && clickCountMap[key] === 15) {
-localStorage.removeItem("goal");
-localStorage.removeItem("record");
-localStorage.removeItem("startDate");
-localStorage.removeItem("lastMarked");
-localStorage.removeItem("mode");
-location.reload();
-}
-});
 
-function getCornerKey(x, y, width, height) {
-const zone = 0.3;
-const cornerSize = Math.min(width, height) * zone;
+// ⏪ 1日目〇連打 → 登録画面へ戻る
+function handleCalendarTap(e) {
+  const square = e.target.closest(".square");
+  if (!square || square.dataset.index !== "0") return;
 
-if (x < cornerSize && y < cornerSize) return "topLeft";
-if (x > width - cornerSize && y < cornerSize) return "topRight";
-if (x > width - cornerSize && y > height - cornerSize) return "bottomRight";
-return null;
+  const now = Date.now();
+  dayOneTapTimes.push(now);
+  dayOneTapTimes = dayOneTapTimes.filter(t => now - t < 5000);
+
+  if (dayOneTapTimes.length >= 10) {
+    dayOneTapTimes = [];
+    mainScreen.classList.add("hidden");
+    startScreen.classList.remove("hidden");
+  }
 }
 
 // 初期化
 window.onload = () => {
-const savedGoal = localStorage.getItem("goal");
-const savedMode = localStorage.getItem("mode");
+  const savedGoal = localStorage.getItem("goal");
+  const savedMode = localStorage.getItem("mode");
 
-if (savedGoal && savedMode) {
-goalText.textContent = savedGoal;
-currentMode = Number(savedMode);
-totalDays = currentMode;
+  if (savedGoal && savedMode) {
+    goalText.textContent = savedGoal;
+    currentMode = Number(savedMode);
+    totalDays = currentMode;
 
-startScreen.classList.add("hidden");
-mainScreen.classList.remove("hidden");
-generateCalendar();
-updateCalendarUI();
-}
-};
+    startScreen.classList.add("hidden");
+    mainScreen.classList.remove("hidden");
+    generateCalendar();
+    updateCalendarUI();
+ 
