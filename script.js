@@ -102,10 +102,11 @@ function updateCalendarUI() {
 
     const isMarked = record.includes(i);
 
-    // PNG表示処理
     if (isMarked) {
       mask.classList.add("hidden");
-      stamp.style.backgroundImage = "url('img/stamp.png')";
+
+      const stampPath = i % 7 === 0 ? "img/smile.png" : "img/heart.png";
+      stamp.style.backgroundImage = `url('${stampPath}')`;
       stamp.classList.add("glow");
     } else {
       stamp.style.backgroundImage = "";
@@ -113,14 +114,12 @@ function updateCalendarUI() {
 
       if (manualMode) {
         if (i <= latestMarked) {
-          // 白〇除去（過去分）
           mask.classList.add("hidden");
         } else {
-          // 白〇復活（未来分）
           mask.classList.remove("hidden");
         }
       } else {
-        mask.classList.remove("hidden"); // 通常モードでは全未達成〇表示
+        mask.classList.remove("hidden");
       }
     }
   });
@@ -148,7 +147,7 @@ function handleGoalTap() {
 
     alert(manualMode ? "🛠 手動モードに切り替えました" : "↩ 通常モードに戻しました");
     completeButton.disabled = manualMode;
-    updateCalendarUI(); // ← モード切替に応じてUI更新
+    updateCalendarUI();
   }
 }
 
