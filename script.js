@@ -149,6 +149,3 @@ window.onload = () => {
     updateCalendarUI();
   }
 };
-
-
- 
