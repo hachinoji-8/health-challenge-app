@@ -1,151 +1,57 @@
-const calendar = document.getElementById("calendar");
-const completeButton = document.getElementById("complete-button");
-const submitButton = document.getElementById("submit-button");
-const goalInput = document.getElementById("goal-input");
-const goalText = document.getElementById("goal-text");
-const startScreen = document.getElementById("start-screen");
-const mainScreen = document.getElementById("main-screen");
+const stampGrid = document.querySelector(".stamp-grid");
+const submitBtn = document.getElementById("submitBtn");
+const sound = document.getElementById("soundEffect");
+let currentMode = 30;
 
-let totalDays = 30;
-let completedDays = 0;
-let currentMode = 30; // default mode
-let manualMode = false;
+// 🪄 スタンプ初期生成
+for (let i = 0; i < currentMode; i++) {
+  const stamp = document.createElement("div");
+  stamp.classList.add("stamp");
+  stamp.dataset.index = i;
+  stamp.addEventListener("click", () => updateProgress(i));
 
-// タップ記録用
-let goalTapTimes = [];
-let dayOneTapTimes = [];
-
-function startChallenge(mode) {
-  const goal = goalInput.value.trim();
-  if (!goal) return;
-
-  currentMode = mode;
-  totalDays = mode;
-  localStorage.setItem("goal", goal);
-  localStorage.setItem("mode", mode);
-  localStorage.setItem("startDate", new Date().toDateString());
-  localStorage.setItem("record", JSON.stringify([]));
-
-  goalText.textContent = goal;
-  startScreen.classList.add("hidden");
-  mainScreen.classList.remove("hidden");
-
-  generateCalendar();
-  updateCalendarUI();
-}
-
-function generateCalendar() {
-  calendar.innerHTML = "";
-  for (let i = 0; i < totalDays; i++) {
-    const square = document.createElement("div");
-    square.className = "square";
-    square.dataset.index = i;
-
-    const stamp = document.createElement("div");
-    stamp.className = "stamp";
-
-    const mask = document.createElement("div");
-    mask.className = "mask";
-
-    square.appendChild(stamp);
-    square.appendChild(mask);
-    calendar.appendChild(square);
-
-    square.addEventListener("click", () => onSquareClick(i));
+  if ((i + 1) % 7 === 0) {
+    stamp.classList.add("highlighted");
   }
+
+  stampGrid.appendChild(stamp);
 }
 
-function onSquareClick(index) {
-  if (!manualMode) return;
-
-  let record = JSON.parse(localStorage.getItem("record") || "[]");
-  if (!record.includes(index)) {
-    record.push(index);
-  } else {
-    record = record.filter(i => i !== index);
-  }
-  localStorage.setItem("record", JSON.stringify(record));
-  updateCalendarUI();
+// 🎬 画面遷移処理
+function goToCalendar() {
+  showPage("calendarPage");
 }
 
-function markToday() {
-  if (!canMarkToday()) return;
-
-  let record = JSON.parse(localStorage.getItem("record") || "[]");
-  const todayIndex = record.length;
-  record.push(todayIndex);
-  localStorage.setItem("record", JSON.stringify(record));
-  localStorage.setItem("lastMarked", new Date().toDateString());
-  updateCalendarUI();
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('visible'));
+  document.getElementById(id).classList.add('visible');
 }
 
-function canMarkToday() {
-  const last = localStorage.getItem("lastMarked");
-  const today = new Date().toDateString();
-  return last !== today;
-}
+// 🔘 白丸制御ロジック
+function updateProgress(tappedIndex) {
+  const stamps = document.querySelectorAll(".stamp");
+  stamps.forEach((stamp, i) => {
+    stamp.classList.remove("reached", "unreached", "glow");
 
-function updateCalendarUI() {
-  const record = JSON.parse(localStorage.getItem("record") || "[]");
-  document.querySelectorAll(".square").forEach((el, i) => {
-    const mask = el.querySelector(".mask");
-    mask.classList.toggle("hidden", record.includes(i));
+    if (i < tappedIndex) {
+      stamp.classList.add("reached");
+    } else {
+      stamp.classList.add("unreached");
+    }
   });
 
-  const valid = record.length >= currentMode;
-  submitButton.classList.toggle("disabled", !valid);
-  submitButton.disabled = !valid;
-  submitButton.onclick = () => {
-    const url =
-      currentMode === 14
-        ? "https://example.com/form14"
-        : "https://example.com/form30";
-    window.open(url, "_blank");
-  };
-}
-
-// 🔁 目標文字連打 → モード切替
-function handleGoalTap() {
-  const now = Date.now();
-  goalTapTimes.push(now);
-  goalTapTimes = goalTapTimes.filter(t => now - t < 5000);
-
-  if (goalTapTimes.length >= 10) {
-    manualMode = !manualMode;
-    goalTapTimes = [];
-    alert(manualMode ? "🛠 手動モードに切り替えました" : "↩ 通常モードに戻しました");
+  // 🌟 全達成判定
+  if (tappedIndex === currentMode - 1) {
+    stamps.forEach(s => s.classList.add("glow"));
+    submitBtn.disabled = false;
+    sound.play(); // 音声再生
+  } else {
+    submitBtn.disabled = true;
   }
 }
 
-// ⏪ 1日目〇連打 → 登録画面へ戻る
-function handleCalendarTap(e) {
-  const square = e.target.closest(".square");
-  if (!square || square.dataset.index !== "0") return;
-
-  const now = Date.now();
-  dayOneTapTimes.push(now);
-  dayOneTapTimes = dayOneTapTimes.filter(t => now - t < 5000);
-
-  if (dayOneTapTimes.length >= 10) {
-    dayOneTapTimes = [];
-    mainScreen.classList.add("hidden");
-    startScreen.classList.remove("hidden");
-  }
+// 📨 応募フォーム遷移
+function submitChallenge() {
+  const url = document.getElementById("urlInput").value;
+  if (url) window.open(url, "_blank");
 }
-
-// 初期化
-window.onload = () => {
-  const savedGoal = localStorage.getItem("goal");
-  const savedMode = localStorage.getItem("mode");
-
-  if (savedGoal && savedMode) {
-    goalText.textContent = savedGoal;
-    currentMode = Number(savedMode);
-    totalDays = currentMode;
-
-    startScreen.classList.add("hidden");
-    mainScreen.classList.remove("hidden");
-    generateCalendar();
-    updateCalendarUI();
-  }
-};
