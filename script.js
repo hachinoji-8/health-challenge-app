@@ -2,6 +2,7 @@ let challengeLength = 14;
 let markedDays = new Set();
 let manualMode = false;
 let tapCount = 0;
+let lastMarkedDate = null;
 
 function startChallenge(days) {
   challengeLength = days;
@@ -12,7 +13,7 @@ function startChallenge(days) {
   document.getElementById("goal-text").textContent = goalText || "（目標未設定）";
 
   renderCalendar();
-  resetState();
+  updateButtonState();
 }
 
 function renderCalendar() {
@@ -32,19 +33,7 @@ function renderCalendar() {
 
     const mask = document.createElement("div");
     mask.className = "mask";
-
     mask.addEventListener("click", () => handleMaskClick(i, mask, stamp));
-
-    // 🧠 裏ワザの処理をここで設定（7番目：index 6）
-    mask.addEventListener("click", () => {
-      if (i === 6 && !manualMode) {
-        tapCount++;
-        if (tapCount >= 5) {
-          document.getElementById("complete-button").disabled = false;
-          tapCount = 0;
-        }
-      }
-    });
 
     square.appendChild(base);
     square.appendChild(stamp);
@@ -53,20 +42,11 @@ function renderCalendar() {
   }
 }
 
-function resetState() {
-  markedDays.clear();
-  manualMode = false;
-  tapCount = 0;
-  const completeButton = document.getElementById("complete-button");
-  completeButton.disabled = false;
-  updateSubmitButton();
-}
-
 function handleMaskClick(index, mask, stamp) {
   if (!manualMode) return;
 
   if (markedDays.has(index)) {
-    // 後ろを消す
+    // 後ろの日を消す
     [...document.querySelectorAll(".mask")].forEach((el, i) => {
       if (i > index) {
         el.classList.remove("hidden");
@@ -78,7 +58,7 @@ function handleMaskClick(index, mask, stamp) {
   mask.classList.add("hidden");
   markedDays.add(index);
   updateSubmitButton();
-  updateGlow();
+  checkGlow();
 }
 
 function markToday() {
@@ -86,7 +66,7 @@ function markToday() {
   if (button.disabled) return;
 
   const todayIndex = markedDays.size;
-  if (todayIndex >= challengeLength || markedDays.has(todayIndex)) return;
+  if (todayIndex >= challengeLength) return;
 
   const masks = document.querySelectorAll(".mask");
   const stamps = document.querySelectorAll(".stamp");
@@ -94,22 +74,23 @@ function markToday() {
   const mask = masks[todayIndex];
   const stamp = stamps[todayIndex];
 
-  if (!mask) return;
+  if (!mask || markedDays.has(todayIndex)) return;
 
   mask.classList.add("hidden");
   markedDays.add(todayIndex);
 
-  // 成功音
+  // 記録
+  lastMarkedDate = new Date().toDateString();
+
+  // 音声
   const audio = document.getElementById("success-audio");
   audio.currentTime = 0;
   audio.play();
 
   updateSubmitButton();
-  updateGlow();
+  checkGlow();
 
-  // ✅ ボタンを非活性にする（連打防止）
   button.disabled = true;
-  button.classList.add("disabled");
 }
 
 function updateSubmitButton() {
@@ -123,20 +104,61 @@ function updateSubmitButton() {
   }
 }
 
-function updateGlow() {
+function checkGlow() {
   const stamps = document.querySelectorAll(".stamp");
   if (markedDays.size === challengeLength) {
-    stamps.forEach((s) => s.classList.add("glow"));
+    stamps.forEach(s => s.classList.add("glow"));
   } else {
-    stamps.forEach((s) => s.classList.remove("glow"));
+    stamps.forEach(s => s.classList.remove("glow"));
   }
 }
 
-// 手動モード切替
+function updateButtonState() {
+  const button = document.getElementById("complete-button");
+
+  if (manualMode) {
+    button.disabled = true;
+    return;
+  }
+
+  const today = new Date().toDateString();
+
+  if (lastMarkedDate !== today) {
+    button.disabled = false;
+  } else {
+    button.disabled = true;
+  }
+}
+
+// 0時を監視して毎日ボタンをリセット
+function monitorMidnight() {
+  setInterval(() => {
+    updateButtonState();
+  }, 1000 * 60); // 毎分チェック
+}
+
 document.addEventListener("DOMContentLoaded", () => {
+  const calendar = document.getElementById("calendar");
+
+  // 裏ワザ：7番目を5回連打でボタン活性化
+  calendar.addEventListener("click", (e) => {
+    const masks = document.querySelectorAll(".mask");
+    masks.forEach((mask, index) => {
+      if (mask.contains(e.target) && index === 6) {
+        tapCount++;
+        if (tapCount >= 5) {
+          document.getElementById("complete-button").disabled = false;
+          tapCount = 0;
+        }
+      }
+    });
+  });
+
+  // 手動モード切替
   document.getElementById("goal-display").addEventListener("click", () => {
     manualMode = true;
-    document.getElementById("complete-button").disabled = false;
+    document.getElementById("complete-button").disabled = true;
   });
-});
 
+  monitorMidnight();
+});
