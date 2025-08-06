@@ -12,6 +12,7 @@ function startChallenge(days) {
   document.getElementById("goal-text").textContent = goalText || "（目標未設定）";
 
   renderCalendar();
+  resetState();
 }
 
 function renderCalendar() {
@@ -31,13 +32,34 @@ function renderCalendar() {
 
     const mask = document.createElement("div");
     mask.className = "mask";
+
     mask.addEventListener("click", () => handleMaskClick(i, mask, stamp));
+
+    // 🧠 裏ワザの処理をここで設定（7番目：index 6）
+    mask.addEventListener("click", () => {
+      if (i === 6 && !manualMode) {
+        tapCount++;
+        if (tapCount >= 5) {
+          document.getElementById("complete-button").disabled = false;
+          tapCount = 0;
+        }
+      }
+    });
 
     square.appendChild(base);
     square.appendChild(stamp);
     square.appendChild(mask);
     calendar.appendChild(square);
   }
+}
+
+function resetState() {
+  markedDays.clear();
+  manualMode = false;
+  tapCount = 0;
+  const completeButton = document.getElementById("complete-button");
+  completeButton.disabled = false;
+  updateSubmitButton();
 }
 
 function handleMaskClick(index, mask, stamp) {
@@ -56,28 +78,15 @@ function handleMaskClick(index, mask, stamp) {
   mask.classList.add("hidden");
   markedDays.add(index);
   updateSubmitButton();
-
-  // すべて達成したらglow追加
-  if (markedDays.size === challengeLength) {
-    document.querySelectorAll(".stamp").forEach((s) => s.classList.add("glow"));
-  } else {
-    document.querySelectorAll(".stamp").forEach((s) => s.classList.remove("glow"));
-  }
-}
-
-function canMarkToday() {
-  const todayIndex = markedDays.size;
-  if (manualMode) return false;
-  return todayIndex < challengeLength && !markedDays.has(todayIndex);
+  updateGlow();
 }
 
 function markToday() {
   const button = document.getElementById("complete-button");
-  if (button.disabled) return; // ボタンが非活性なら何もしない
+  if (button.disabled) return;
 
   const todayIndex = markedDays.size;
-
-  if (todayIndex >= challengeLength) return;
+  if (todayIndex >= challengeLength || markedDays.has(todayIndex)) return;
 
   const masks = document.querySelectorAll(".mask");
   const stamps = document.querySelectorAll(".stamp");
@@ -85,7 +94,7 @@ function markToday() {
   const mask = masks[todayIndex];
   const stamp = stamps[todayIndex];
 
-  if (!mask || markedDays.has(todayIndex)) return;
+  if (!mask) return;
 
   mask.classList.add("hidden");
   markedDays.add(todayIndex);
@@ -96,10 +105,11 @@ function markToday() {
   audio.play();
 
   updateSubmitButton();
+  updateGlow();
 
-  if (markedDays.size === challengeLength) {
-    stamps.forEach((s) => s.classList.add("glow"));
-  }
+  // ✅ ボタンを非活性にする（連打防止）
+  button.disabled = true;
+  button.classList.add("disabled");
 }
 
 function updateSubmitButton() {
@@ -113,24 +123,17 @@ function updateSubmitButton() {
   }
 }
 
+function updateGlow() {
+  const stamps = document.querySelectorAll(".stamp");
+  if (markedDays.size === challengeLength) {
+    stamps.forEach((s) => s.classList.add("glow"));
+  } else {
+    stamps.forEach((s) => s.classList.remove("glow"));
+  }
+}
+
+// 手動モード切替
 document.addEventListener("DOMContentLoaded", () => {
-  const calendar = document.getElementById("calendar");
-
-  calendar.addEventListener("click", (e) => {
-    const masks = document.querySelectorAll(".mask");
-    masks.forEach((mask, index) => {
-      if (mask.contains(e.target)) {
-        if (index === 6) {
-          tapCount++;
-          if (tapCount >= 5) {
-            document.getElementById("complete-button").disabled = false;
-            tapCount = 0;
-          }
-        }
-      }
-    });
-  });
-
   document.getElementById("goal-display").addEventListener("click", () => {
     manualMode = true;
     document.getElementById("complete-button").disabled = false;
