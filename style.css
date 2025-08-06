@@ -1,125 +1,115 @@
-body {
-  font-family: sans-serif;
-  text-align: center;
-  margin: 0;
-  padding: 0;
-  background: url('img/background.jpg') center center / cover no-repeat fixed;
+const calendarSize = 35;
+let record = [];
+let manualMode = false;
+
+const completeButton = document.querySelector('.complete-button');
+const manualToggle = document.querySelector('.manual-toggle');
+const stampContainer = document.querySelector('.stamp-container');
+const linkButton = document.querySelector('.link-button');
+const sound = new Audio('success.mp3');
+
+// 初期化
+generateCalendar();
+updateCalendarUI();
+updateCompleteButtonState();
+
+completeButton.addEventListener('click', () => {
+  if (canMarkToday()) {
+    markToday();
+  }
+});
+
+manualToggle.addEventListener('click', () => {
+  manualMode = !manualMode;
+  manualToggle.classList.toggle('active', manualMode);
+});
+
+function getTodayIndex() {
+  const today = new Date();
+  return today.getDate() % calendarSize;
 }
 
-.hidden {
-  display: none;
+function canMarkToday() {
+  const todayIndex = getTodayIndex();
+  return !record.includes(todayIndex);
 }
 
-#start-screen,
-#main-screen {
-  padding: 2rem;
+function markToday() {
+  const todayIndex = getTodayIndex();
+  record.push(todayIndex);
+  updateCalendarUI();
+  playSuccessSound();
+  updateCompleteButtonState();
+  checkLinkAvailability();
 }
 
-#goal-input {
-  font-size: 1.2rem;
-  padding: 0.5rem;
-  width: 80%;
-  max-width: 300px;
-  margin-bottom: 1rem;
+function playSuccessSound() {
+  sound.currentTime = 0;
+  sound.play();
 }
 
-.mode-buttons button {
-  margin: 1rem;
-  font-size: 1.1rem;
-  padding: 0.8rem;
+function updateCompleteButtonState() {
+  completeButton.disabled = !canMarkToday();
 }
 
-#goal-display {
-  font-size: 1.3rem;
-  margin-bottom: 1rem;
-  cursor: pointer;
+function generateCalendar() {
+  stampContainer.innerHTML = '';
+
+  for (let i = 0; i < calendarSize; i++) {
+    const circle = document.createElement('div');
+    circle.className = 'base-circle';
+    circle.dataset.index = i;
+
+    const stamp = document.createElement('img');
+    stamp.className = 'stamp';
+    stamp.src = i % 7 === 0 ? 'smile.png' : 'heart.png';
+    stamp.style.opacity = '0.2';
+
+    const mask = document.createElement('div');
+    mask.className = 'mask';
+
+    circle.appendChild(stamp);
+    circle.appendChild(mask);
+    stampContainer.appendChild(circle);
+
+    circle.addEventListener('click', () => {
+      if (manualMode) {
+        handleManualStamp(i);
+      }
+    });
+  }
 }
 
-#calendar {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 5px;
-  padding: 1rem;
-  max-width: 400px;
-  margin: 0 auto;
+function updateCalendarUI() {
+  const circles = document.querySelectorAll('.base-circle');
+
+  circles.forEach((circle, i) => {
+    const stamp = circle.querySelector('.stamp');
+    const mask = circle.querySelector('.mask');
+    if (record.includes(i)) {
+      stamp.style.opacity = '1';
+      mask.style.display = 'none';
+    } else {
+      stamp.style.opacity = '0.2';
+      mask.style.display = 'block';
+    }
+  });
 }
 
-.square {
-  position: relative;
-  width: 100%;
-  padding-bottom: 100%;
-  border-radius: 50%;
-  overflow: hidden;
-  border: 2px solid black;
+function handleManualStamp(index) {
+  const newRecord = [];
+  for (let i = 0; i < calendarSize; i++) {
+    if (i <= index) {
+      newRecord.push(i);
+    }
+  }
+  record = newRecord;
+  updateCalendarUI();
+  checkLinkAvailability();
 }
 
-/* 下層の白丸ベース */
-.base-circle {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  background-color: white;
-  border-radius: 50%;
-  z-index: 1;
-}
-
-/* 中層：スタンプ */
-.stamp {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  background-size: contain;
-  background-position: center;
-  background-repeat: no-repeat;
-  opacity: 0.9;
-  z-index: 2;
-}
-
-/* 上層：白いカバー */
-.mask {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  background-color: white;
-  border-radius: 50%;
-  z-index: 3;
-}
-
-.mask.hidden {
-  display: none;
-}
-
-#complete-button {
-  margin: 1rem auto;
-  font-size: 1.2rem;
-  padding: 1rem;
-  background: pink;
-  border: none;
-  border-radius: 10px;
-  cursor: pointer;
-}
-
-.submit-buttons {
-  margin-top: 1rem;
-}
-
-.submit-buttons button {
-  font-size: 1.2rem;
-  padding: 1rem 2rem;
-}
-
-.submit-buttons button.disabled {
-  opacity: 0.5;
-  pointer-events: none;
-}
-
-/* スタンプ達成演出 */
-.stamp.glow {
-  animation: shine 1.5s infinite;
-}
-
-@keyframes shine {
-  0%   { box-shadow: 0 0 5px gold; transform: scale(1); }
-  50%  { box-shadow: 0 0 15px orange; transform: scale(1.1); }
-  100% { box-shadow: 0 0 5px gold; transform: scale(1); }
+function checkLinkAvailability() {
+  const required = [0,1,2,3,4];
+  const complete = required.every(i => record.includes(i));
+  linkButton.disabled = !complete;
 }
