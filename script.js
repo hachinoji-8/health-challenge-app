@@ -15,7 +15,7 @@ let goalTapTimes = [];
 let dayOneTapTimes = [];
 let daySevenTapTimes = [];
 
-function startChallenge(mode) {
+window.startChallenge = function (mode) {
   const goal = goalInput.value.trim();
   if (!goal) return;
 
@@ -44,7 +44,7 @@ function startChallenge(mode) {
   updateCalendarUI();
 
   document.getElementById("goal-text")?.addEventListener("click", handleGoalTap);
-}
+};
 
 function generateCalendar() {
   calendar.innerHTML = "";
@@ -76,17 +76,28 @@ function generateCalendar() {
 function onSquareClick(index) {
   if (!manualMode) return;
 
-  const newRecord = [];
-  for (let i = 0; i < totalDays; i++) {
-    if (i <= index) newRecord.push(i);
+  let record = JSON.parse(localStorage.getItem("record") || "[]");
+
+  if (record.includes(index)) {
+    // index以降を削除
+    record = record.filter(i => i < index);
+    for (let i = 0; i <= index; i++) {
+      if (!record.includes(i)) {
+        record.push(i);
+      }
+    }
+  } else {
+    // indexまでを追加
+    record = [];
+    for (let i = 0; i <= index; i++) {
+      record.push(i);
+    }
   }
 
-  const oldRecord = JSON.parse(localStorage.getItem("record") || "[]");
-  if (newRecord.length !== oldRecord.length) {
-    playSuccessSound();
-  }
+  record = [...new Set(record)].sort((a, b) => a - b);
 
-  localStorage.setItem("record", JSON.stringify(newRecord));
+  localStorage.setItem("record", JSON.stringify(record));
+  playSuccessSound();
   updateCalendarUI();
 }
 
@@ -125,12 +136,8 @@ function updateCalendarUI() {
       stamp.classList.add("glow");
     } else {
       stamp.classList.remove("glow");
-      if (manualMode) {
-        if (i <= latestMarked) {
-          mask.classList.add("hidden");
-        } else {
-          mask.classList.remove("hidden");
-        }
+      if (manualMode && i <= latestMarked) {
+        mask.classList.add("hidden");
       } else {
         mask.classList.remove("hidden");
       }
@@ -152,9 +159,7 @@ function updateCalendarUI() {
 
 function playSuccessSound() {
   successAudio.currentTime = 0;
-  successAudio.play().catch(e => {
-    // 一部ブラウザで自動再生制限により再生されないことがあるため無視
-  });
+  successAudio.play().catch(e => {});
 }
 
 function handleGoalTap() {
@@ -167,7 +172,7 @@ function handleGoalTap() {
     alert(manualMode ? "🛠 手動モードに切り替えました" : "↩ 通常モードに戻しました");
     completeButton.disabled = manualMode;
     if (manualMode) {
-      localStorage.setItem("lastMarked", new Date().toDateString()); // 無理やり達成済みに
+      localStorage.setItem("lastMarked", new Date().toDateString());
     }
     updateCalendarUI();
   }
@@ -201,7 +206,6 @@ function handleCalendarTap(e, index) {
   }
 }
 
-// 0時にボタン復活＆手動解除
 function dailyReset() {
   const now = new Date();
   const hour = now.getHours();
@@ -215,7 +219,7 @@ function dailyReset() {
     completeButton.disabled = false;
     if (manualMode) {
       manualMode = false;
-      alert("⏰ 新しい日です！手動モードが解除されました。");
+      alert("⏰ 新しい日です！通常モードに戻りました。");
       updateCalendarUI();
     }
     dailyReset();
