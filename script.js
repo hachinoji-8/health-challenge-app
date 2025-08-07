@@ -1,173 +1,184 @@
-const calendarSize = 35;
-let record = [];
+const calendar = document.getElementById("calendar");
+const completeButton = document.getElementById("complete-button");
+const submitButton = document.getElementById("submit-button");
+const goalInput = document.getElementById("goal-input");
+const goalText = document.getElementById("goal-text");
+const startScreen = document.getElementById("start-screen");
+const mainScreen = document.getElementById("main-screen");
+const successAudio = document.getElementById("success-audio");
+
+let totalDays = 30;
+let currentMode = 30;
 let manualMode = false;
 
-const completeButton = document.querySelector('.complete-button');
-const manualToggle = document.querySelector('.manual-toggle');
-const stampContainer = document.querySelector('.stamp-container');
-const linkButton = document.querySelector('.link-button');
-const sound = new Audio('success.mp3');
+// 裏技用タップ記録
+let goalTapTimes = [];
+let dayOneTapTimes = [];
+let daySevenTapTimes = [];
 
-// 初期化
+// チャレンジ開始
+function startChallenge(mode) {
+const goal = goalInput.value.trim();
+if (!goal) return;
+
+if (goal.length > 20) {
+alert("目標は20文字以内で入力してね！");
+goalInput.value = "";
+return;
+}
+
+currentMode = mode;
+totalDays = mode;
+
+localStorage.setItem("goal", goal);
+localStorage.setItem("mode", mode);
+
+goalText.textContent = goal;
+startScreen.classList.add("hidden");
+mainScreen.classList.remove("hidden");
+
 generateCalendar();
 updateCalendarUI();
-updateCompleteButtonState();
 
-completeButton.addEventListener('click', () => {
-  if (canMarkToday()) {
-    markToday();
-  }
-});
-
-manualToggle.addEventListener('click', () => {
-  manualMode = !manualMode;
-  manualToggle.classList.toggle('active', manualMode);
-});
-
-function getTodayIndex() {
-  const today = new Date();
-  return today.getDate() % calendarSize;
-body {
-  font-family: sans-serif;
-  background-image: url("img/background.jpg");
-  background-size: cover;
-  margin: 0;
-  padding: 0;
-  text-align: center;
-  color: #333;
+// 裏技用リスナー（目標タップで手動モード切替）
+goalText.addEventListener("click", handleGoalTap);
 }
 
-function canMarkToday() {
-  const todayIndex = getTodayIndex();
-  return !record.includes(todayIndex);
-#calendar-container {
-  padding: 20px;
-}
-
-function markToday() {
-  const todayIndex = getTodayIndex();
-  record.push(todayIndex);
-  updateCalendarUI();
-  playSuccessSound();
-  updateCompleteButtonState();
-  checkLinkAvailability();
-.buttons {
-  margin-bottom: 20px;
-}
-
-function playSuccessSound() {
-  sound.currentTime = 0;
-  sound.play();
-button {
-  padding: 10px 20px;
-  margin: 5px;
-  font-size: 16px;
-  cursor: pointer;
-}
-
-function updateCompleteButtonState() {
-  completeButton.disabled = !canMarkToday();
-#calendar {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 10px;
-  margin: 20px auto;
-  max-width: 500px;
-}
-
+// カレンダー生成
 function generateCalendar() {
-  stampContainer.innerHTML = '';
+calendar.innerHTML = "";
+for (let i = 0; i < totalDays; i++) {
+const square = document.createElement("div");
+square.className = "square";
+square.dataset.index = i;
 
-  for (let i = 0; i < calendarSize; i++) {
-    const circle = document.createElement('div');
-    circle.className = 'base-circle';
-    circle.dataset.index = i;
+const base = document.createElement("div");
+base.className = "base";
 
-    const stamp = document.createElement('img');
-    stamp.className = 'stamp';
-    stamp.src = i % 7 === 0 ? 'smile.png' : 'heart.png';
-    stamp.style.opacity = '0.2';
-.dot {
-  width: 50px;
-  height: 50px;
-  background-color: white;
-  border-radius: 50%;
-  position: relative;
-  overflow: hidden;
+const stamp = document.createElement("div");
+stamp.className = "stamp";
+stamp.style.backgroundImage = `url('${i % 7 === 6 ? "img/smile.png" : "img/heart.png"}')`;
+
+const mask = document.createElement("div");
+mask.className = "mask";
+
+square.appendChild(base);
+square.appendChild(stamp);
+square.appendChild(mask);
+calendar.appendChild(square);
+
+square.addEventListener("click", () => handleCalendarTap(null, i));
+}
 }
 
-    const mask = document.createElement('div');
-    mask.className = 'mask';
-.smile {
-  background-image: url("img/smile.png");
-  background-size: cover;
+// 今日のチャレンジ達成（履歴記録なし）
+function markToday() {
+if (manualMode || completeButton.disabled) return;
+playSuccessSound();
+completeButton.disabled = true;
+updateCalendarUI();
 }
 
-    circle.appendChild(stamp);
-    circle.appendChild(mask);
-    stampContainer.appendChild(circle);
-.cover {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.7);
-  transition: opacity 0.3s;
-}
-
-    circle.addEventListener('click', () => {
-      if (manualMode) {
-        handleManualStamp(i);
-      }
-    });
-  }
-.cover.open {
-  opacity: 0;
-  pointer-events: none;
-}
-
+// UI更新（現状は全マスク表示）
 function updateCalendarUI() {
-  const circles = document.querySelectorAll('.base-circle');
-#stamp {
-  margin-top: 30px;
+document.querySelectorAll(".square").forEach((el) => {
+const mask = el.querySelector(".mask");
+const stamp = el.querySelector(".stamp");
+mask.classList.remove("hidden");
+stamp.classList.remove("glow");
+});
+
+submitButton.classList.add("disabled");
+submitButton.disabled = true;
 }
 
-  circles.forEach((circle, i) => {
-    const stamp = circle.querySelector('.stamp');
-    const mask = circle.querySelector('.mask');
-    if (record.includes(i)) {
-      stamp.style.opacity = '1';
-      mask.style.display = 'none';
-    } else {
-      stamp.style.opacity = '0.2';
-      mask.style.display = 'block';
-    }
-  });
-#stamp img {
-  width: 100px;
-  animation: blink 1s infinite;
+// 成功音
+function playSuccessSound() {
+successAudio.currentTime = 0;
+successAudio.play().catch(() => {});
 }
 
-function handleManualStamp(index) {
-  const newRecord = [];
-  for (let i = 0; i < calendarSize; i++) {
-    if (i <= index) {
-      newRecord.push(i);
-    }
-  }
-  record = newRecord;
-  updateCalendarUI();
-  checkLinkAvailability();
-.hidden {
-  display: none;
+// 裏技：目標5連打で手動モード切替
+function handleGoalTap() {
+const now = Date.now();
+goalTapTimes.push(now);
+goalTapTimes = goalTapTimes.filter(t => now - t < 3000);
+if (goalTapTimes.length >= 5) {
+manualMode = !manualMode;
+goalTapTimes = [];
+alert(manualMode ? "🛠 手動モードに切り替えました" : "↩ 通常モードに戻しました");
+completeButton.disabled = manualMode;
+updateCalendarUI();
+}
 }
 
-function checkLinkAvailability() {
-  const required = [0,1,2,3,4];
-  const complete = required.every(i => record.includes(i));
-  linkButton.disabled = !complete;
-@keyframes blink {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
+// 裏技：1日目 or 7日目5連打
+function handleCalendarTap(e, index) {
+const now = Date.now();
+
+// 1日目5連打でスタート画面へ
+if (index === 0) {
+dayOneTapTimes.push(now);
+dayOneTapTimes = dayOneTapTimes.filter(t => now - t < 3000);
+if (dayOneTapTimes.length >= 5) {
+dayOneTapTimes = [];
+startScreen.classList.remove("hidden");
+mainScreen.classList.add("hidden");
 }
+}
+
+// 7日目5連打でボタン復活
+if (index === 6) {
+daySevenTapTimes.push(now);
+daySevenTapTimes = daySevenTapTimes.filter(t => now - t < 3000);
+if (daySevenTapTimes.length >= 5) {
+daySevenTapTimes = [];
+completeButton.disabled = false;
+}
+}
+}
+
+// 毎日0時に自動復活
+function dailyReset() {
+const now = new Date();
+const hour = now.getHours();
+const minutes = now.getMinutes();
+const seconds = now.getSeconds();
+
+const msUntilNextMidnight =
+((24 - hour - 1) * 60 * 60 + (60 - minutes - 1) * 60 + (60 - seconds)) * 1000;
+
+setTimeout(() => {
+if (!manualMode) {
+completeButton.disabled = false;
+}
+dailyReset();
+}, msUntilNextMidnight);
+}
+
+// ページ読み込み時
+window.addEventListener("load", () => {
+const savedGoal = localStorage.getItem("goal");
+const savedMode = localStorage.getItem("mode");
+
+if (savedGoal && savedMode) {
+goalText.textContent = savedGoal;
+currentMode = Number(savedMode);
+totalDays = currentMode;
+
+startScreen.classList.add("hidden");
+mainScreen.classList.remove("hidden");
+
+generateCalendar();
+updateCalendarUI();
+
+goalText.addEventListener("click", handleGoalTap);
+}
+
+dailyReset();
+});
+
+// HTML onclick 対応用にグローバル公開
+window.startChallenge = startChallenge;
+window.markToday = markToday;
+
