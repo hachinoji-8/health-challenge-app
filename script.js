@@ -179,6 +179,25 @@ dailyReset();
 });
 
 // HTML onclick 対応用にグローバル公開
-window.startChallenge = startChallenge;
+window.startChallenge = function(mode) {
+  const goal = goalInput.value.trim();
+  if (!goal) return;
+
+  if (goal.length > 20) {
+    alert("目標は20文字以内で入力してね！");
+    goalInput.value = "";
+    return;
+  }
+
+  currentMode = mode;
+  totalDays = mode;
+
+  goalText.textContent = goal;
+  startScreen.classList.add("hidden");
+  mainScreen.classList.remove("hidden");
+
+  generateCalendar();
+  updateCalendarUI();
+};
 window.markToday = markToday;
 
