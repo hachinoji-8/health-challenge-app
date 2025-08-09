@@ -6,27 +6,22 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
-<!-- スタート画面 -->
-<div id="start-screen">
-    <h1>達成カレンダー</h1>
-    <input type="text" id="goal-input" placeholder="目標を入力（20文字以内）" maxlength="20">
-    <div class="mode-select">
-        <button class="mode-btn" data-days="14">14日モード</button>
-        <button class="mode-btn" data-days="30">30日モード</button>
+    <div id="start-screen">
+        <h1>目標設定</h1>
+        <input type="text" id="goal-input" placeholder="目標を入力">
+        <div>
+            <button class="mode-btn" data-days="14">14日モード</button>
+            <button class="mode-btn" data-days="30">30日モード</button>
+        </div>
     </div>
-</div>
 
-<!-- カレンダー画面 -->
-<div id="calendar-screen" style="display:none;">
-    <h2 id="goal-text"></h2>
-    <div id="calendar" class="calendar"></div>
-    <div class="buttons">
+    <div id="calendar-screen" style="display:none;">
+        <h2 id="goal-text"></h2>
+        <div id="calendar"></div>
         <button id="achieve-btn" disabled>今日の達成</button>
-        <button id="form-btn" disabled>応募フォームへ</button>
+        <button id="form-btn" disabled>応募フォーム</button>
     </div>
-</div>
 
-<script src="script.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
