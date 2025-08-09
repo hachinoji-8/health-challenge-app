@@ -1,42 +1,134 @@
 body {
-    font-family: sans-serif;
-    text-align: center;
-    background: url('img/background.jpg') no-repeat center center fixed;
-    background-size: cover;
+  font-family: sans-serif;
+  text-align: center;
+  margin: 0;
+  padding: 0;
+  background: url('img/background.jpg') center center / cover no-repeat fixed;
 }
 
+.hidden {
+  display: none;
+}
+
+#start-screen, #main-screen {
+  padding: 2rem;
+}
+
+#goal-input {
+  font-size: 1.2rem;
+  padding: 0.5rem;
+  width: 80%;
+  max-width: 300px;
+  margin-bottom: 1rem;
+}
+
+.mode-buttons button {
+  margin: 1rem;
+  font-size: 1.1rem;
+  padding: 0.8rem;
+}
+
+#goal-display {
+  font-size: 1.3rem;
+  margin-bottom: 1rem;
+  cursor: pointer;
+}
+
+/* カレンダー */
 #calendar {
-    display: grid;
-    grid-template-columns: repeat(7, 60px);
-    grid-gap: 10px;
-    justify-content: center;
-    margin: 20px auto;
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+  padding: 1rem;
+  max-width: 420px;
+  margin: 0 auto;
 }
 
-.cell {
-    position: relative;
-    width: 60px;
-    height: 60px;
+.square {
+  position: relative;
+  width: 100%;
+  padding-bottom: 100%; /* 正方形を丸にするトリック */
+  border-radius: 50%;
+  overflow: visible;
 }
 
-.base {
-    position: absolute;
-    width: 60px;
-    height: 60px;
-    background: white;
-    border-radius: 50%;
+/* base: 不動の白丸（背景の上に常時表示） */
+.square .base {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background-color: white;
+  border: 2px solid black;
+  border-radius: 50%;
+  z-index: 1;
+  box-sizing: border-box;
 }
 
-.stamp {
-    position: absolute;
-    width: 60px;
-    height: 60px;
+/* stamp: PNG（heart/smile） 常時表示 */
+.square .stamp {
+  position: absolute;
+  width: 70%;
+  height: 70%;
+  left: 15%;
+  top: 15%;
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
+  opacity: 0.95;
+  z-index: 2;
 }
 
-.mask {
-    position: absolute;
-    width: 60px;
-    height: 60px;
-    background: white;
-    border-radius: 50%;
+/* mask: カバー（白丸） — これを表示/非表示して達成を表す */
+.square .mask {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background-color: white;
+  border: 2px solid black;
+  border-radius: 50%;
+  transition: opacity 0.25s;
+  z-index: 3;
+  box-sizing: border-box;
+}
+
+.mask.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* 完了スタンプの光り方 */
+.stamp.glow {
+  animation: shine 1.5s infinite;
+}
+
+/* ボタン周り */
+#complete-button {
+  margin: 1rem auto;
+  font-size: 1.2rem;
+  padding: 1rem;
+  background: pink;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.submit-buttons {
+  margin-top: 1rem;
+}
+
+.submit-buttons button {
+  font-size: 1.2rem;
+  padding: 1rem 2rem;
+}
+
+.submit-buttons button.disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+/* shine アニメ */
+@keyframes shine {
+  0% { box-shadow: 0 0 5px gold; transform: scale(1); }
+  50% { box-shadow: 0 0 15px orange; transform: scale(1.05); }
+  100% { box-shadow: 0 0 5px gold; transform: scale(1); }
 }
