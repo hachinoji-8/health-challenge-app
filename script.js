@@ -111,27 +111,36 @@ function secretClick(type) {
             clickTimers[type] = null;
         }, 3000);
     }
+
     if (clickCounts[type] >= 5) {
         clickCounts[type] = 0;
         clearTimeout(clickTimers[type]);
         clickTimers[type] = null;
-        if (type === "day1") { // スタート画面に戻す
+
+        if (type === "day1") { 
+            // スタート画面に戻す
             startScreen.style.display = "block";
             calendarScreen.style.display = "none";
             goalInput.value = "";
             record = [];
             saveData();
         }
-        if (type === "day7") { // 達成ボタン強制有効化
+        else if (type === "day7") { 
+            // 達成ボタン強制有効化（モード関係なし）
             enableAchieveBtn();
         }
-        if (type === "goal") { // 手動モード切替
+        else if (type === "goal") { 
+            // 手動モード切替のみ
             manualMode = !manualMode;
-            if (!manualMode) enableAchieveBtn();
-            else disableAchieveBtn();
+            if (manualMode) {
+                disableAchieveBtn(); // 手動中は常に無効化
+            } else {
+                // 手動解除後は0時リセット待ち、即有効化はしない
+            }
         }
     }
 }
+
 
 // --- 手動モード切替（目標テキスト5回タップ） ---
 goalText.addEventListener("click", () => secretClick("goal"));
