@@ -1,10 +1,8 @@
-// script.js
-
 // --- 定数・変数 ---
 let modeDays = 14; // 14日 or 30日モード
-let record = []; // 達成状態 true=マスク外れ、false=マスクあり
-let manualMode = false; // 手動モード
-let clickCounts = { day1: 0, day7: 0, goal: 0 }; // 裏技用カウント
+let record = [];   // true=マスク外れ、false=マスクあり
+let manualMode = false;
+let clickCounts = { day1: 0, day7: 0, goal: 0 };
 let clickTimers = { day1: null, day7: null, goal: null };
 const formURL = "https://www.tochigihoken.or.jp/";
 
@@ -23,6 +21,7 @@ loadData();
 renderCalendar();
 updateFormBtn();
 disableAchieveBtn(); // 初期は無効
+setMidnightReset();
 
 // --- モード選択 ---
 modeButtons.forEach(btn => {
@@ -50,21 +49,18 @@ function renderCalendar() {
         const cell = document.createElement("div");
         cell.classList.add("cell");
 
-        // base 白丸
         const base = document.createElement("div");
         base.classList.add("base");
 
-        // stamp
         const stamp = document.createElement("img");
         stamp.classList.add("stamp");
         stamp.src = ((i + 1) % 7 === 0) ? "img/heart.png" : "img/smile.png";
 
-        // mask
         const mask = document.createElement("div");
         mask.classList.add("mask");
         if (record[i]) mask.style.display = "none";
 
-        // マスクリック（手動モードのみ有効）
+        // 手動モードのみ直接変更可能
         cell.addEventListener("click", () => {
             if (manualMode) {
                 record[i] = !record[i];
@@ -74,7 +70,7 @@ function renderCalendar() {
             }
         });
 
-        // 裏技検出
+        // 裏技
         if (i === 0) cell.addEventListener("click", () => secretClick("day1"));
         if (i === 6) cell.addEventListener("click", () => secretClick("day7"));
 
@@ -85,7 +81,7 @@ function renderCalendar() {
     }
 }
 
-// --- 「今日の達成」ボタン ---
+// --- 今日の達成 ---
 achieveBtn.addEventListener("click", () => {
     const idx = record.findIndex(v => v === false);
     if (idx !== -1) {
@@ -97,12 +93,12 @@ achieveBtn.addEventListener("click", () => {
     disableAchieveBtn();
 });
 
-// --- 応募フォームボタン ---
+// --- 応募フォーム ---
 formBtn.addEventListener("click", () => {
     window.open(formURL, "_blank");
 });
 
-// --- 裏技クリック判定 ---
+// --- 裏技判定 ---
 function secretClick(type) {
     clickCounts[type]++;
     if (!clickTimers[type]) {
@@ -117,7 +113,7 @@ function secretClick(type) {
         clearTimeout(clickTimers[type]);
         clickTimers[type] = null;
 
-        if (type === "day1") { 
+        if (type === "day1") {
             // スタート画面に戻す
             startScreen.style.display = "block";
             calendarScreen.style.display = "none";
@@ -125,36 +121,31 @@ function secretClick(type) {
             record = [];
             saveData();
         }
-        else if (type === "day7") { 
-            // 達成ボタン強制有効化（モード関係なし）
-            enableAchieveBtn();
+        else if (type === "day7") {
+            enableAchieveBtn(); // 強制有効化
         }
-        else if (type === "goal") { 
-            // 手動モード切替のみ
+        else if (type === "goal") {
+            // 手動モード切替
             manualMode = !manualMode;
-            if (manualMode) {
-                disableAchieveBtn(); // 手動中は常に無効化
-            } else {
-                // 手動解除後は0時リセット待ち、即有効化はしない
-            }
+            disableAchieveBtn(); // 切替時は必ず無効化
         }
     }
 }
 
-
-// --- 手動モード切替（目標テキスト5回タップ） ---
+// --- 手動モード切替（目標5回タップ） ---
 goalText.addEventListener("click", () => secretClick("goal"));
 
-// --- 0時にボタン有効化 ---
+// --- 0時リセット ---
 function setMidnightReset() {
     const now = new Date();
     const msToMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1) - now;
     setTimeout(() => {
-        enableAchieveBtn();
+        if (!manualMode) {
+            enableAchieveBtn();
+        }
         setMidnightReset();
     }, msToMidnight);
 }
-setMidnightReset();
 
 // --- ボタン制御 ---
 function enableAchieveBtn() {
@@ -164,7 +155,7 @@ function disableAchieveBtn() {
     achieveBtn.disabled = true;
 }
 
-// --- 応募フォームボタン制御 ---
+// --- フォームボタン制御 ---
 function updateFormBtn() {
     const allDone = record.every(v => v === true);
     formBtn.disabled = !allDone;
