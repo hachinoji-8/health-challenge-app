@@ -1,203 +1,174 @@
-const calendar = document.getElementById("calendar");
-const completeButton = document.getElementById("complete-button");
-const submitButton = document.getElementById("submit-button");
-const goalInput = document.getElementById("goal-input");
-const goalText = document.getElementById("goal-text");
+// script.js
+
+// --- 定数・変数 ---
+let modeDays = 14; // 14日 or 30日モード
+let record = []; // 達成状態 true=マスク外れ、false=マスクあり
+let manualMode = false; // 手動モード
+let clickCounts = { day1: 0, day7: 0, goal: 0 }; // 裏技用カウント
+let clickTimers = { day1: null, day7: null, goal: null };
+const formURL = "https://www.tochigihoken.or.jp/";
+
+// --- 要素取得 ---
 const startScreen = document.getElementById("start-screen");
-const mainScreen = document.getElementById("main-screen");
-const successAudio = document.getElementById("success-audio");
+const calendarScreen = document.getElementById("calendar-screen");
+const goalInput = document.getElementById("goal-input");
+const modeButtons = document.querySelectorAll(".mode-btn");
+const calendar = document.getElementById("calendar");
+const goalText = document.getElementById("goal-text");
+const achieveBtn = document.getElementById("achieve-btn");
+const formBtn = document.getElementById("form-btn");
 
-let totalDays = 30;
-let currentMode = 30;
-let manualMode = false;
+// --- 初期化 ---
+loadData();
+renderCalendar();
+updateFormBtn();
+disableAchieveBtn(); // 初期は無効
 
-// 裏技用タップ記録
-let goalTapTimes = [];
-let dayOneTapTimes = [];
-let daySevenTapTimes = [];
-
-// チャレンジ開始
-function startChallenge(mode) {
-const goal = goalInput.value.trim();
-if (!goal) return;
-
-if (goal.length > 20) {
-alert("目標は20文字以内で入力してね！");
-goalInput.value = "";
-return;
-}
-
-currentMode = mode;
-totalDays = mode;
-
-localStorage.setItem("goal", goal);
-localStorage.setItem("mode", mode);
-
-goalText.textContent = goal;
-startScreen.classList.add("hidden");
-mainScreen.classList.remove("hidden");
-
-generateCalendar();
-updateCalendarUI();
-
-// 裏技用リスナー（目標タップで手動モード切替）
-goalText.addEventListener("click", handleGoalTap);
-}
-
-// カレンダー生成
-function generateCalendar() {
-calendar.innerHTML = "";
-for (let i = 0; i < totalDays; i++) {
-const square = document.createElement("div");
-square.className = "square";
-square.dataset.index = i;
-
-const base = document.createElement("div");
-base.className = "base";
-
-const stamp = document.createElement("div");
-stamp.className = "stamp";
-stamp.style.backgroundImage = `url('${i % 7 === 6 ? "img/smile.png" : "img/heart.png"}')`;
-
-const mask = document.createElement("div");
-mask.className = "mask";
-
-square.appendChild(base);
-square.appendChild(stamp);
-square.appendChild(mask);
-calendar.appendChild(square);
-
-square.addEventListener("click", () => handleCalendarTap(null, i));
-}
-}
-
-// 今日のチャレンジ達成（履歴記録なし）
-function markToday() {
-if (manualMode || completeButton.disabled) return;
-playSuccessSound();
-completeButton.disabled = true;
-updateCalendarUI();
-}
-
-// UI更新（現状は全マスク表示）
-function updateCalendarUI() {
-document.querySelectorAll(".square").forEach((el) => {
-const mask = el.querySelector(".mask");
-const stamp = el.querySelector(".stamp");
-mask.classList.remove("hidden");
-stamp.classList.remove("glow");
+// --- モード選択 ---
+modeButtons.forEach(btn => {
+    btn.addEventListener("click", () => {
+        modeDays = parseInt(btn.dataset.days);
+        startScreen.style.display = "none";
+        calendarScreen.style.display = "block";
+        goalText.textContent = goalInput.value;
+        initCalendar();
+    });
 });
 
-submitButton.classList.add("disabled");
-submitButton.disabled = true;
+// --- カレンダー初期化 ---
+function initCalendar() {
+    record = Array(modeDays).fill(false);
+    saveData();
+    renderCalendar();
+    disableAchieveBtn();
 }
 
-// 成功音
-function playSuccessSound() {
-successAudio.currentTime = 0;
-successAudio.play().catch(() => {});
+// --- カレンダー描画 ---
+function renderCalendar() {
+    calendar.innerHTML = "";
+    for (let i = 0; i < modeDays; i++) {
+        const cell = document.createElement("div");
+        cell.classList.add("cell");
+
+        // base 白丸
+        const base = document.createElement("div");
+        base.classList.add("base");
+
+        // stamp
+        const stamp = document.createElement("img");
+        stamp.classList.add("stamp");
+        stamp.src = ((i + 1) % 7 === 0) ? "img/heart.png" : "img/smile.png";
+
+        // mask
+        const mask = document.createElement("div");
+        mask.classList.add("mask");
+        if (record[i]) mask.style.display = "none";
+
+        // マスクリック（手動モードのみ有効）
+        cell.addEventListener("click", () => {
+            if (manualMode) {
+                record[i] = !record[i];
+                saveData();
+                renderCalendar();
+                updateFormBtn();
+            }
+        });
+
+        // 裏技検出
+        if (i === 0) cell.addEventListener("click", () => secretClick("day1"));
+        if (i === 6) cell.addEventListener("click", () => secretClick("day7"));
+
+        cell.appendChild(base);
+        cell.appendChild(stamp);
+        cell.appendChild(mask);
+        calendar.appendChild(cell);
+    }
 }
 
-// 裏技：目標5連打で手動モード切替
-function handleGoalTap() {
-const now = Date.now();
-goalTapTimes.push(now);
-goalTapTimes = goalTapTimes.filter(t => now - t < 3000);
-if (goalTapTimes.length >= 5) {
-manualMode = !manualMode;
-goalTapTimes = [];
-alert(manualMode ? "🛠 手動モードに切り替えました" : "↩ 通常モードに戻しました");
-completeButton.disabled = manualMode;
-updateCalendarUI();
-}
-}
-
-// 裏技：1日目 or 7日目5連打
-function handleCalendarTap(e, index) {
-const now = Date.now();
-
-// 1日目5連打でスタート画面へ
-if (index === 0) {
-dayOneTapTimes.push(now);
-dayOneTapTimes = dayOneTapTimes.filter(t => now - t < 3000);
-if (dayOneTapTimes.length >= 5) {
-dayOneTapTimes = [];
-startScreen.classList.remove("hidden");
-mainScreen.classList.add("hidden");
-}
-}
-
-// 7日目5連打でボタン復活
-if (index === 6) {
-daySevenTapTimes.push(now);
-daySevenTapTimes = daySevenTapTimes.filter(t => now - t < 3000);
-if (daySevenTapTimes.length >= 5) {
-daySevenTapTimes = [];
-completeButton.disabled = false;
-}
-}
-}
-
-// 毎日0時に自動復活
-function dailyReset() {
-const now = new Date();
-const hour = now.getHours();
-const minutes = now.getMinutes();
-const seconds = now.getSeconds();
-
-const msUntilNextMidnight =
-((24 - hour - 1) * 60 * 60 + (60 - minutes - 1) * 60 + (60 - seconds)) * 1000;
-
-setTimeout(() => {
-if (!manualMode) {
-completeButton.disabled = false;
-}
-dailyReset();
-}, msUntilNextMidnight);
-}
-
-// ページ読み込み時
-window.addEventListener("load", () => {
-const savedGoal = localStorage.getItem("goal");
-const savedMode = localStorage.getItem("mode");
-
-if (savedGoal && savedMode) {
-goalText.textContent = savedGoal;
-currentMode = Number(savedMode);
-totalDays = currentMode;
-
-startScreen.classList.add("hidden");
-mainScreen.classList.remove("hidden");
-
-generateCalendar();
-updateCalendarUI();
-
-goalText.addEventListener("click", handleGoalTap);
-}
-
-dailyReset();
+// --- 「今日の達成」ボタン ---
+achieveBtn.addEventListener("click", () => {
+    const idx = record.findIndex(v => v === false);
+    if (idx !== -1) {
+        record[idx] = true;
+        saveData();
+        renderCalendar();
+        updateFormBtn();
+    }
+    disableAchieveBtn();
 });
 
-// HTML onclick 対応用にグローバル公開
-window.startChallenge = function(mode) {
-  const goal = goalInput.value.trim();
-  if (!goal) return;
+// --- 応募フォームボタン ---
+formBtn.addEventListener("click", () => {
+    window.open(formURL, "_blank");
+});
 
-  if (goal.length > 20) {
-    alert("目標は20文字以内で入力してね！");
-    goalInput.value = "";
-    return;
-  }
+// --- 裏技クリック判定 ---
+function secretClick(type) {
+    clickCounts[type]++;
+    if (!clickTimers[type]) {
+        clickTimers[type] = setTimeout(() => {
+            clickCounts[type] = 0;
+            clickTimers[type] = null;
+        }, 3000);
+    }
+    if (clickCounts[type] >= 5) {
+        clickCounts[type] = 0;
+        clearTimeout(clickTimers[type]);
+        clickTimers[type] = null;
+        if (type === "day1") { // スタート画面に戻す
+            startScreen.style.display = "block";
+            calendarScreen.style.display = "none";
+            goalInput.value = "";
+            record = [];
+            saveData();
+        }
+        if (type === "day7") { // 達成ボタン強制有効化
+            enableAchieveBtn();
+        }
+        if (type === "goal") { // 手動モード切替
+            manualMode = !manualMode;
+            if (!manualMode) enableAchieveBtn();
+            else disableAchieveBtn();
+        }
+    }
+}
 
-  currentMode = mode;
-  totalDays = mode;
+// --- 手動モード切替（目標テキスト5回タップ） ---
+goalText.addEventListener("click", () => secretClick("goal"));
 
-  goalText.textContent = goal;
-  startScreen.classList.add("hidden");
-  mainScreen.classList.remove("hidden");
+// --- 0時にボタン有効化 ---
+function setMidnightReset() {
+    const now = new Date();
+    const msToMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1) - now;
+    setTimeout(() => {
+        enableAchieveBtn();
+        setMidnightReset();
+    }, msToMidnight);
+}
+setMidnightReset();
 
-  generateCalendar();
-  updateCalendarUI();
-};
-window.markToday = markToday;
+// --- ボタン制御 ---
+function enableAchieveBtn() {
+    achieveBtn.disabled = false;
+}
+function disableAchieveBtn() {
+    achieveBtn.disabled = true;
+}
 
+// --- 応募フォームボタン制御 ---
+function updateFormBtn() {
+    const allDone = record.every(v => v === true);
+    formBtn.disabled = !allDone;
+}
+
+// --- 保存・読込 ---
+function saveData() {
+    localStorage.setItem("record", JSON.stringify(record));
+    localStorage.setItem("modeDays", modeDays);
+}
+function loadData() {
+    const rec = localStorage.getItem("record");
+    if (rec) record = JSON.parse(rec);
+    const days = localStorage.getItem("modeDays");
+    if (days) modeDays = parseInt(days);
+}
