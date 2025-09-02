@@ -17,7 +17,7 @@ let lastDate = null;
 
 // ---------------- 初期化 ----------------
 function resetApp() {
-  screen1.classList.remove("hidden");
+ screen1.classList.remove("hidden");
   screen2.classList.add("hidden");
   goalInput.value = "";
   calendar.innerHTML = "";
@@ -26,7 +26,13 @@ function resetApp() {
   achieved = [];
   currentDay = 0;
   challengeDays = 0;
-  localStorage.clear();
+- localStorage.clear();
++ lastDate = null; // ← 今日の達成チェックをリセット
++ localStorage.removeItem("goal");
++ localStorage.removeItem("challengeDays");
++ localStorage.removeItem("currentDay");
++ localStorage.removeItem("achieved");
++ localStorage.removeItem("lastDate");
 }
 
 // ---------------- カレンダー作成 ----------------
