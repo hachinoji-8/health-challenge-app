@@ -141,10 +141,12 @@ function showModal() {
 confirmReset.addEventListener("click", () => {
   modal.classList.add("hidden");
   resetApp();
-  window.open(
-    "https://docs.google.com/forms/d/e/1FAIpQLSc9X2GgBDBuM29HJx37j_eUykUujmIHVQpapsl2ckc26TzD8g/viewform?usp=header",
-    "_blank"
-  );
+  setTimeout(() => {
+    window.open(
+      "https://docs.google.com/forms/d/e/1FAIpQLSc9X2GgBDBuM29HJx37j_eUykUujmIHVQpapsl2ckc26TzD8g/viewform?usp=header",
+      "_blank"
+    );
+  }, 100); // モーダル閉じてからフォームへ
 });
 
 cancelReset.addEventListener("click", () => {
