@@ -74,9 +74,9 @@ function startChallenge(days) {
 // ---------------- 今日の達成 ----------------
 achieveBtn.addEventListener("click", () => {
   const today = new Date().toDateString();
-  if (lastDate === today) {
-    alert("今日はすでに達成済みです！");
-    return;
+　if (lastDate === today) {
+  alert("今日はすでに達成済みです！");
+  return;
   }
   currentDay++;
   lastDate = today;
