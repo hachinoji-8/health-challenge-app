@@ -34,74 +34,48 @@ body {
   cursor: pointer;
 }
 
-/* カレンダー */
 #calendar {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 8px;
+  gap: 5px;
   padding: 1rem;
-  max-width: 420px;
+  max-width: 400px;
   margin: 0 auto;
 }
 
 .square {
   position: relative;
   width: 100%;
-  padding-bottom: 100%; /* 正方形を丸にするトリック */
+  padding-bottom: 100%;
   border-radius: 50%;
-  overflow: visible;
+  border: 2px solid black; /* 黒ふち */
+  overflow: hidden;
+  background-color: white; /* ベース白丸 */
 }
 
-/* base: 不動の白丸（背景の上に常時表示） */
-.square .base {
+.square .stamp {
   position: absolute;
   width: 100%;
   height: 100%;
-  background-color: white;
-  border: 2px solid black;
-  border-radius: 50%;
-  z-index: 1;
-  box-sizing: border-box;
-}
-
-/* stamp: PNG（heart/smile） 常時表示 */
-.square .stamp {
-  position: absolute;
-  width: 70%;
-  height: 70%;
-  left: 15%;
-  top: 15%;
   background-size: contain;
   background-position: center;
   background-repeat: no-repeat;
-  opacity: 0.95;
-  z-index: 2;
+  opacity: 0.9;
 }
 
-/* mask: カバー（白丸） — これを表示/非表示して達成を表す */
 .square .mask {
   position: absolute;
   width: 100%;
   height: 100%;
   background-color: white;
-  border: 2px solid black;
   border-radius: 50%;
-  transition: opacity 0.25s;
-  z-index: 3;
-  box-sizing: border-box;
+  transition: opacity 0.3s;
 }
 
 .mask.hidden {
   opacity: 0;
-  pointer-events: none;
 }
 
-/* 完了スタンプの光り方 */
-.stamp.glow {
-  animation: shine 1.5s infinite;
-}
-
-/* ボタン周り */
 #complete-button {
   margin: 1rem auto;
   font-size: 1.2rem;
@@ -126,9 +100,43 @@ body {
   pointer-events: none;
 }
 
-/* shine アニメ */
+.stamp.glow {
+  animation: shine 1.5s infinite;
+}
+
 @keyframes shine {
   0% { box-shadow: 0 0 5px gold; transform: scale(1); }
-  50% { box-shadow: 0 0 15px orange; transform: scale(1.05); }
+  50% { box-shadow: 0 0 15px orange; transform: scale(1.1); }
   100% { box-shadow: 0 0 5px gold; transform: scale(1); }
+}
+
+/* モーダル */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-content {
+  background: white;
+  padding: 2rem;
+  border-radius: 10px;
+  max-width: 400px;
+  text-align: center;
+}
+
+.modal-buttons {
+  margin-top: 1rem;
+}
+
+.modal-buttons button {
+  margin: 0.5rem;
+  padding: 0.8rem 1.5rem;
+  font-size: 1rem;
 }
