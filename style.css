@@ -7,8 +7,9 @@ body {
 }
 
 .hidden {
-  display: none;
+  display: none !important;
 }
+
 
 #start-screen, #main-screen {
   padding: 2rem;
