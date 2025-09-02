@@ -22,17 +22,25 @@
     <div id="goal-display">
       🌟 あなたの目標 🌟<br /><span id="goal-text"></span>
     </div>
-
     <div id="calendar"></div>
-
     <button id="complete-button" onclick="markToday()">🎯今日のチャレンジ達成🎯</button>
-
     <div class="submit-buttons">
       <button id="submit-button" class="disabled" disabled>🤸‍♀️応募フォームへ🤸‍♀️</button>
     </div>
   </div>
 
-  <audio id="success-audio" src="img/success.mp3" preload="auto"></audio>
+  <!-- モーダル -->
+  <div id="modal" class="modal hidden">
+    <div class="modal-content">
+      <p>チャレンジ達成おめでとうございます！🎉<br>
+      応募フォーム送信画面に移動します。<br>
+      アプリはリセットされますので、スクリーンショットをとってください。</p>
+      <div class="modal-buttons">
+        <button id="confirm-reset">リセットして応募フォームへ</button>
+        <button id="cancel-reset">キャンセル</button>
+      </div>
+    </div>
+  </div>
 
   <script src="script.js" defer></script>
 </body>
