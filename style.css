@@ -1,92 +1,119 @@
+/* ベース */
+html,body { height: 100%; margin:0; }
 body {
-  background: url('background.jpg') no-repeat center center/cover;
   font-family: sans-serif;
   text-align: center;
-  color: #333;
+  color:#222;
+  background: url('img/background.jpg') center center / cover no-repeat fixed;
 }
 
-.hidden {
-  display: none !important;
+/* 非表示フラグ（強制） */
+.hidden { display: none !important; }
+
+/* スタート / メイン */
+#start-screen, #main-screen { padding: 2rem; }
+
+/* 入力 */
+#goal-input {
+  font-size: 1.2rem;
+  padding: 0.5rem;
+  width: 80%;
+  max-width: 320px;
+  margin-bottom: 1rem;
 }
 
-.btnRow {
-  margin: 1em;
-}
-.btnRow button {
-  margin: 0.5em;
-  padding: 0.8em 1.5em;
-  font-size: 1em;
+/* ボタン（元の大きさ・絵文字を維持）*/
+.mode-buttons button, .modal-buttons button, #complete-button, .submit-buttons button {
+  margin: 0.6rem;
+  font-size: 1.1rem;
+  padding: 0.8rem 1rem;
   border-radius: 10px;
   cursor: pointer;
+  touch-action: manipulation; /* モバイルのダブルタップズーム抑制用 */
 }
 
+/* 目標表示（隠しタップ用）*/
+#goal-display { font-size: 1.3rem; margin-bottom: 1rem; cursor: pointer; }
+
+/* カレンダー */
 .calendar {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 5px;
-  justify-items: center;
-  margin: 1em;
+  gap: 6px;
+  padding: 1rem;
+  max-width: 440px;
+  margin: 0 auto 1rem auto;
 }
 
+/* 各丸（ベース）*/
 .square {
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
-  background: #fff;
-  border: 2px solid #000;
   position: relative;
+  width: 100%;
+  padding-bottom: 100%;
+  border-radius: 50%;
+  border: 2px solid black; /* 黒縁 */
+  background: white; /* ベース白丸 */
   overflow: hidden;
+  touch-action: manipulation;
 }
 
-.stamp {
+/* PNGスタンプ（下層）*/
+.square .stamp {
   position: absolute;
-  top: 0; left: 0;
-  width: 100%;
-  height: 100%;
-  background-size: cover;
+  top:0; left:0;
+  width:100%; height:100%;
+  background-size: contain;
   background-position: center;
+  background-repeat: no-repeat;
   z-index: 1;
 }
 
-.mask {
+/* カバー（上層）*/
+.square .mask {
   position: absolute;
-  top: 0; left: 0;
-  width: 100%;
-  height: 100%;
+  top:0; left:0;
+  width:100%; height:100%;
   border-radius: 50%;
-  background: #fff;
+  background: white;
   z-index: 2;
+  transition: opacity .2s;
 }
 
-.mask.hidden {
-  display: none;
+/* 非表示（外れた）*/
+.square .mask.hidden { display: none; }
+
+/* 全部解除時のキラキラ */
+.stamp.glow {
+  animation: shine 1.5s infinite;
+}
+@keyframes shine {
+  0% { box-shadow: 0 0 5px gold; transform: scale(1); }
+  50% { box-shadow: 0 0 15px orange; transform: scale(1.05); }
+  100% { box-shadow: 0 0 5px gold; transform: scale(1); }
 }
 
-.glow {
-  animation: glow 1s infinite alternate;
-}
-
-@keyframes glow {
-  from { box-shadow: 0 0 5px gold; }
-  to { box-shadow: 0 0 20px gold; }
-}
-
+/* モーダル */
 .modal {
   position: fixed;
-  top: 0; left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0,0,0,0.5);
+  inset: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 999;
+  background: rgba(0,0,0,0.5);
+  z-index: 9999;
+}
+.modal-content {
+  background: #fff;
+  padding: 1.6rem;
+  border-radius: 12px;
+  max-width: 360px;
+  text-align: center;
 }
 
-.modalContent {
-  background: #fff;
-  padding: 2em;
-  border-radius: 15px;
-  max-width: 300px;
+/* submit ボタン無効見た目 */
+.submit-buttons .disabled,
+#submit-button.disabled {
+  opacity: 0.5;
+  pointer-events: none;
 }
 
