@@ -1,47 +1,43 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
-  <title>健康チャレンジ</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta charset="UTF-8">
+  <title>チャレンジカレンダー</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <!-- 目標登録画面 -->
-  <div id="start-screen">
+  <!-- 画面① 目標設定 -->
+  <div id="screen1">
     <h1>チャレンジ目標を入力してね🌟</h1>
-    <input type="text" id="goal-input" placeholder="目標を入力してね(20文字以内)" maxlength="20" />
-    <div class="mode-buttons">
-      <button onclick="startChallenge(14)">🌟きっずチャレンジ🌟<br>14日間スタート</button>
-      <button onclick="startChallenge(30)">🌟健康チャレンジ🌟<br>30日間スタート</button>
+    <input id="goalInput" maxlength="20" placeholder="20文字以内">
+    <div class="btnRow">
+      <button id="btn14">🌟きっずチャレンジ🌟<br>14日間スタート</button>
+      <button id="btn30">🌟健康チャレンジ🌟<br>30日間スタート</button>
     </div>
   </div>
 
-  <!-- カレンダー画面 -->
-  <div id="main-screen" class="hidden">
-    <div id="goal-display">
-      🌟 あなたの目標 🌟<br /><span id="goal-text"></span>
-    </div>
-    <div id="calendar"></div>
-    <button id="complete-button" onclick="markToday()">🎯今日のチャレンジ達成🎯</button>
-    <div class="submit-buttons">
-      <button id="submit-button" class="disabled" disabled>🤸‍♀️応募フォームへ🤸‍♀️</button>
-    </div>
+  <!-- 画面② カレンダー -->
+  <div id="screen2" class="hidden">
+    <h2 id="goalText"></h2>
+    <div id="calendar" class="calendar"></div>
+    <button id="achieveBtn">🎯 今日の達成</button>
+    <button id="formBtn" class="hidden">📩 応募フォームへ</button>
   </div>
 
   <!-- モーダル -->
   <div id="modal" class="modal hidden">
-    <div class="modal-content">
-      <p>チャレンジ達成おめでとうございます！🎉<br>
+    <div class="modalContent">
+      <p>🎉 チャレンジ達成おめでとうございます！ 🎉<br>
       応募フォーム送信画面に移動します。<br>
       アプリはリセットされますので、スクリーンショットをとってください。</p>
-      <div class="modal-buttons">
-        <button id="confirm-reset">リセットして応募フォームへ</button>
-        <button id="cancel-reset">キャンセル</button>
+      <div class="btnRow">
+        <button id="confirmReset">📸 リセットして応募フォームへ</button>
+        <button id="cancelReset">❌ キャンセル</button>
       </div>
     </div>
   </div>
 
-  <script src="script.js" defer></script>
+  <audio id="successSound" src="success.mp3"></audio>
+  <script src="script.js"></script>
 </body>
 </html>
