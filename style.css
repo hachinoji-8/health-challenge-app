@@ -73,18 +73,6 @@ button.hidden {
 }
 
 .cover {
-  position: absolute;
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  background: #fff;
-  border: 2px solid #000;
-  top: 0;
-  left: 0;
-  cursor: pointer;
-}
-
-.circle {
   width: 60px;   /* 丸のサイズ */
   height: 60px;
   border-radius: 50%;
@@ -94,8 +82,9 @@ button.hidden {
   justify-content: center;
   font-size: 32px;     /* スタンプの大きさ */
   line-height: 1;      /* 余白を消す */
-  overflow: hidden;    /* はみ出しを防ぐ */
+  overflow: hidden; 
 }
+
 
 
 /* モーダル */
