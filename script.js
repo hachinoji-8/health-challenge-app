@@ -1,131 +1,78 @@
-const startScreen = document.getElementById("start-screen");
-const calendarScreen = document.getElementById("calendar-screen");
-const goalInput = document.getElementById("goal-input");
-const goalText = document.getElementById("goal-text");
-const dailyButton = document.getElementById("daily-button");
-const formButton = document.getElementById("form-button");
-const calendar = document.getElementById("calendar");
-const modal = document.getElementById("modal");
-const confirmReset = document.getElementById("confirm-reset");
-const cancelReset = document.getElementById("cancel-reset");
-const successSound = document.getElementById("success-sound");
+const goalInput = document.getElementById('goal-input');
+const goalDisplay = document.getElementById('goal-display');
+const startScreen = document.getElementById('start-screen');
+const calendarScreen = document.getElementById('calendar-screen');
+const calendar = document.getElementById('calendar');
+const markTodayBtn = document.getElementById('mark-today');
+const submitFormBtn = document.getElementById('submit-form');
+const modal = document.getElementById('modal');
+const resetAndSubmitBtn = document.getElementById('reset-and-submit');
+const cancelModalBtn = document.getElementById('cancel-modal');
+const successSound = document.getElementById('success-sound');
 
-const FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSc9X2GgBDBuM29HJx37j_eUykUujmIHVQpapsl2ckc26TzD8g/viewform?usp=header";
+let challengeDays = 0;
+let markedCount = 0;
 
-let state = {
-  goal: "",
-  days: 0,
-  progress: 0,
-  lastMarked: "",
-};
+function createCalendar(days) {
+  calendar.innerHTML = '';
+  for (let i = 0; i < days; i++) {
+    const day = document.createElement('div');
+    day.classList.add('calendar-day');
 
-function saveState() {
-  localStorage.setItem("challengeState", JSON.stringify(state));
-}
+    const stamp = document.createElement('img');
+    stamp.classList.add('stamp');
+    stamp.src = (i + 1) % 7 === 0 ? 'img/smile.png' : 'img/heart.png';
+    day.appendChild(stamp);
 
-function loadState() {
-  const saved = localStorage.getItem("challengeState");
-  if (saved) state = JSON.parse(saved);
-}
-
-function resetApp() {
-  localStorage.removeItem("challengeState");
-  state = { goal: "", days: 0, progress: 0, lastMarked: "" };
-  showScreen(startScreen);
-}
-
-function showScreen(screen) {
-  document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
-  screen.classList.add("active");
-}
-
-function buildCalendar() {
-  calendar.innerHTML = "";
-  for (let i = 0; i < state.days; i++) {
-    const day = document.createElement("div");
-    day.className = "day";
-
-    const icon = document.createElement("img");
-    icon.src = (i+1) % 7 === 0 ? "img/smile.png" : "img/heart.png";
-    icon.className = "icon";
-
-    const cover = document.createElement("div");
-    cover.className = "cover";
-    if (i < state.progress) cover.style.display = "none";
-
-    day.appendChild(icon);
+    const cover = document.createElement('div');
+    cover.classList.add('calendar-day', 'cover');
     day.appendChild(cover);
+
     calendar.appendChild(day);
   }
 }
 
-function markDay() {
-  const today = new Date().toDateString();
-  if (state.lastMarked === today) return; // 1日1回制限
+function startChallenge(days) {
+  const goal = goalInput.value.trim();
+  if (goal.length === 0 || goal.length > 20) {
+    alert('20字以内で入力してね');
+    goalInput.value = '';
+    return;
+  }
+  challengeDays = days;
+  goalDisplay.textContent = goal;
+  startScreen.classList.add('hidden');
+  calendarScreen.classList.remove('hidden');
+  createCalendar(days);
+}
 
-  if (state.progress < state.days) {
-    state.progress++;
-    state.lastMarked = today;
-    saveState();
-    buildCalendar();
+document.getElementById('start-14').onclick = () => startChallenge(14);
+document.getElementById('start-30').onclick = () => startChallenge(30);
+
+markTodayBtn.onclick = () => {
+  const covers = document.querySelectorAll('.calendar-day.cover');
+  if (covers.length > 0) {
+    covers[0].remove();
+    markedCount++;
     successSound.play();
-
-    if (state.progress === state.days) {
-      document.querySelectorAll(".icon").forEach(i => i.classList.add("sparkle"));
-      modal.classList.remove("hidden");
-      formButton.classList.remove("hidden");
+    if (markedCount === challengeDays) {
+      submitFormBtn.classList.remove('disabled');
+      submitFormBtn.classList.add('sparkle');
+      modal.classList.remove('hidden');
     }
   }
-}
+};
 
-document.getElementById("start-14").addEventListener("click", () => {
-  if (!goalInput.value.trim()) return alert("目標を入力してください");
-  state.goal = goalInput.value.trim();
-  state.days = 14;
-  state.progress = 0;
-  state.lastMarked = "";
-  saveState();
-  goalText.textContent = state.goal;
-  buildCalendar();
-  showScreen(calendarScreen);
-});
+resetAndSubmitBtn.onclick = () => {
+  modal.classList.add('hidden');
+  calendarScreen.classList.add('hidden');
+  startScreen.classList.remove('hidden');
+  goalInput.value = '';
+  markedCount = 0;
+  window.open('https://your-google-form-url.com', '_blank');
+};
 
-document.getElementById("start-30").addEventListener("click", () => {
-  if (!goalInput.value.trim()) return alert("目標を入力してください");
-  state.goal = goalInput.value.trim();
-  state.days = 30;
-  state.progress = 0;
-  state.lastMarked = "";
-  saveState();
-  goalText.textContent = state.goal;
-  buildCalendar();
-  showScreen(calendarScreen);
-});
-
-dailyButton.addEventListener("click", markDay);
-
-formButton.addEventListener("click", () => {
-  window.open(FORM_URL, "_blank");
-});
-
-confirmReset.addEventListener("click", () => {
-  modal.classList.add("hidden");
-  resetApp();
-  setTimeout(() => window.open(FORM_URL, "_blank"), 200);
-});
-
-cancelReset.addEventListener("click", () => {
-  modal.classList.add("hidden");
-});
-
-// 初期ロード
-loadState();
-if (state.goal && state.days > 0) {
-  goalText.textContent = state.goal;
-  buildCalendar();
-  showScreen(calendarScreen);
-} else {
-  showScreen(startScreen);
-}
-
+cancelModalBtn.onclick = () => {
+  modal.classList.add('hidden');
+};
 
