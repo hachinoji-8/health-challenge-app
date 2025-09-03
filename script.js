@@ -64,4 +64,3 @@ submitFormBtn.onclick = () => {
     window.open('https://docs.google.com/forms/d/1cRD9TaL2ttqSduD3FfO4jtGHO9yhNK18Xqdk21pQEW8/viewform', '_blank');
   }
 };
-
