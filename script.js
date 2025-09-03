@@ -5,9 +5,6 @@ const calendarScreen = document.getElementById('calendar-screen');
 const calendar = document.getElementById('calendar');
 const markTodayBtn = document.getElementById('mark-today');
 const submitFormBtn = document.getElementById('submit-form');
-const modal = document.getElementById('modal');
-const resetAndSubmitBtn = document.getElementById('reset-and-submit');
-const cancelModalBtn = document.getElementById('cancel-modal');
 const successSound = document.getElementById('success-sound');
 
 let challengeDays = 0;
@@ -58,34 +55,13 @@ markTodayBtn.onclick = () => {
     if (markedCount === challengeDays) {
       submitFormBtn.classList.remove('disabled');
       submitFormBtn.classList.add('sparkle');
-      modal.classList.remove('hidden');
     }
   }
 };
 
-document.addEventListener('DOMContentLoaded', () => {
-  const cancelModalBtn = document.getElementById('cancel-modal');
-  const resetAndSubmitBtn = document.getElementById('reset-and-submit');
-  const modal = document.getElementById('modal');
-  const calendarScreen = document.getElementById('calendar-screen');
-  const startScreen = document.getElementById('start-screen');
-  const goalInput = document.getElementById('goal-input');
-
-  cancelModalBtn.addEventListener('click', () => {
-    modal.classList.add('hidden');
-  });
-
-  resetAndSubmitBtn.addEventListener('click', () => {
-    modal.classList.add('hidden');
-    calendarScreen.classList.add('hidden');
-    startScreen.classList.remove('hidden');
-    goalInput.value = '';
-    markedCount = 0;
+submitFormBtn.onclick = () => {
+  if (!submitFormBtn.classList.contains('disabled')) {
     window.open('https://docs.google.com/forms/d/1cRD9TaL2ttqSduD3FfO4jtGHO9yhNK18Xqdk21pQEW8/viewform', '_blank');
-  });
-});
-
-cancelModalBtn.onclick = () => {
-  modal.classList.add('hidden');
+  }
 };
 
