@@ -84,6 +84,20 @@ button.hidden {
   cursor: pointer;
 }
 
+.circle {
+  width: 60px;   /* 丸のサイズ */
+  height: 60px;
+  border-radius: 50%;
+  border: 2px solid black;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;     /* スタンプの大きさ */
+  line-height: 1;      /* 余白を消す */
+  overflow: hidden;    /* はみ出しを防ぐ */
+}
+
+
 /* モーダル */
 #modal {
   position: fixed;
