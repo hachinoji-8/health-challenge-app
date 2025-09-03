@@ -1,43 +1,48 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <title>チャレンジカレンダー</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+  <title>目標達成カレンダー</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <!-- 画面① 目標設定 -->
-  <div id="screen1">
-    <h1>目標を入力してください</h1>
-    <input id="goalInput" maxlength="20" placeholder="20文字以内">
-    <div class="btnRow">
-      <button id="btn14">14日間チャレンジ</button>
-      <button id="btn30">30日間チャレンジ</button>
+  <!-- 画面① スタート -->
+  <div id="start-screen" class="screen">
+    <h1>🌟目標を立てよう🌟</h1>
+    <input id="goal-input" type="text" maxlength="20" placeholder="目標を入力（20字以内）" />
+    <div class="buttons">
+      <button id="start-14">🌟きっずチャレンジ🌟<br>14日間スタート</button>
+      <button id="start-30">🌟健康チャレンジ🌟<br>30日間スタート</button>
     </div>
   </div>
 
   <!-- 画面② カレンダー -->
-  <div id="screen2" class="hidden">
-    <h2 id="goalText"></h2>
-    <div id="calendar" class="calendar"></div>
-    <button id="achieveBtn">🎯 今日の達成</button>
-    <button id="formBtn" class="hidden">📩 応募フォームへ</button>
-  </div>
-
-  <!-- モーダル -->
-  <div id="modal" class="modal hidden">
-    <div class="modalContent">
-      <p>🎉 チャレンジ達成おめでとうございます！ 🎉<br>
-      応募フォーム送信画面に移動します。<br>
-      アプリはリセットされますので、スクリーンショットをとってください。</p>
-      <div class="btnRow">
-        <button id="confirmReset">📸 リセットして応募フォームへ</button>
-        <button id="cancelReset">❌ キャンセル</button>
-      </div>
+  <div id="calendar-screen" class="screen hidden">
+    <h2 id="goal-text"></h2>
+    <div id="calendar"></div>
+    <div class="buttons">
+      <button id="daily-button">🎯今日のチャレンジ達成🎯</button>
+      <button id="form-button" class="hidden">🤸‍♀️応募フォームへ🤸‍♀️</button>
     </div>
   </div>
 
-  <audio id="successSound" src="success.mp3"></audio>
+  <!-- モーダル -->
+  <div id="modal" class="hidden">
+    <div class="modal-content">
+      <p>チャレンジ達成おめでとうございます！<br>
+      応募フォーム送信画面に移動します。<br>
+      アプリはリセットされますので、<br>
+      スクリーンショットをとってください。</p>
+      <button id="confirm-reset">📸 リセットして応募フォームへ</button>
+      <button id="cancel-reset">❌ キャンセル</button>
+    </div>
+  </div>
+
+  <!-- サウンド -->
+  <audio id="success-sound" src="img/success.mp3" preload="auto"></audio>
+
   <script src="script.js"></script>
 </body>
 </html>
+
