@@ -1,251 +1,131 @@
-const screen1 = document.getElementById("screen1");
-const screen2 = document.getElementById("screen2");
-const goalInput = document.getElementById("goalInput");
-const goalText = document.getElementById("goalText");
+const startScreen = document.getElementById("start-screen");
+const calendarScreen = document.getElementById("calendar-screen");
+const goalInput = document.getElementById("goal-input");
+const goalText = document.getElementById("goal-text");
+const dailyButton = document.getElementById("daily-button");
+const formButton = document.getElementById("form-button");
 const calendar = document.getElementById("calendar");
-const achieveBtn = document.getElementById("achieveBtn");
-const formBtn = document.getElementById("formBtn");
-
 const modal = document.getElementById("modal");
-const confirmReset = document.getElementById("confirmReset");
-const cancelReset = document.getElementById("cancelReset");
-const successSound = document.getElementById("successSound");
+const confirmReset = document.getElementById("confirm-reset");
+const cancelReset = document.getElementById("cancel-reset");
+const successSound = document.getElementById("success-sound");
 
-let challengeDays = 0;
-let currentDay = 0;
-let achieved = [];
-let lastDate = null;
-let manualMode = false;
-let clickCount = 0;
-let clickTimer = null;
+const FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSc9X2GgBDBuM29HJx37j_eUykUujmIHVQpapsl2ckc26TzD8g/viewform?usp=header";
 
-// ---------------- 初期化 ----------------
+let state = {
+  goal: "",
+  days: 0,
+  progress: 0,
+  lastMarked: "",
+};
+
+function saveState() {
+  localStorage.setItem("challengeState", JSON.stringify(state));
+}
+
+function loadState() {
+  const saved = localStorage.getItem("challengeState");
+  if (saved) state = JSON.parse(saved);
+}
+
 function resetApp() {
-  screen1.classList.remove("hidden");
-  screen2.classList.add("hidden");
-  goalInput.value = "";
+  localStorage.removeItem("challengeState");
+  state = { goal: "", days: 0, progress: 0, lastMarked: "" };
+  showScreen(startScreen);
+}
+
+function showScreen(screen) {
+  document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+  screen.classList.add("active");
+}
+
+function buildCalendar() {
   calendar.innerHTML = "";
-  goalText.textContent = "";
-  formBtn.classList.add("hidden");
-  achieved = [];
-  currentDay = 0;
-  challengeDays = 0;
-  manualMode = false;
-  localStorage.clear();
-}
+  for (let i = 0; i < state.days; i++) {
+    const day = document.createElement("div");
+    day.className = "day";
 
-// ---------------- カレンダー作成 ----------------
-function createCalendar(days) {
-  calendar.innerHTML = "";
-  for (let i = 1; i <= days; i++) {
-    const square = document.createElement("div");
-    square.className = "square";
-    square.dataset.index = i;
+    const icon = document.createElement("img");
+    icon.src = (i+1) % 7 === 0 ? "img/smile.png" : "img/heart.png";
+    icon.className = "icon";
 
-    const stamp = document.createElement("div");
-    stamp.className = "stamp";
-    stamp.style.backgroundImage =
-      i % 7 === 0 ? "url('smile.png')" : "url('heart.png')";
+    const cover = document.createElement("div");
+    cover.className = "cover";
+    if (i < state.progress) cover.style.display = "none";
 
-    const mask = document.createElement("div");
-    mask.className = "mask";
-    mask.id = `mask-${i}`;
-
-    square.appendChild(stamp);
-    square.appendChild(mask);
-    calendar.appendChild(square);
-
-    // 手動モード用クリックイベント
-    square.addEventListener("click", () => {
-      if (!manualMode) return;
-      updateManualProgress(i);
-    });
-
-    // 特殊操作：1番目の〇で画面①に戻る
-    if (i === 1) {
-      square.addEventListener("click", () => {
-        handleSpecialClick(() => {
-          screen1.classList.remove("hidden");
-          screen2.classList.add("hidden");
-          goalInput.value = goalText.textContent;
-        });
-      });
-    }
-
-    // 特殊操作：7番目の〇で達成ボタン活性化
-    if (i === 7) {
-      square.addEventListener("click", () => {
-        handleSpecialClick(() => {
-          achieveBtn.disabled = false;
-        });
-      });
-    }
+    day.appendChild(icon);
+    day.appendChild(cover);
+    calendar.appendChild(day);
   }
 }
 
-// ---------------- チャレンジ開始 ----------------
-document.getElementById("btn14").addEventListener("click", () => startChallenge(14));
-document.getElementById("btn30").addEventListener("click", () => startChallenge(30));
-
-function startChallenge(days) {
-  const goal = goalInput.value.trim();
-  if (!goal) {
-    alert("目標を入力してください！");
-    return;
-  }
-  if (goal.length > 20) {
-    alert("20文字以内で入力してください！");
-    goalInput.value = "";
-    return;
-  }
-
-  challengeDays = days;
-  goalText.textContent = goal;
-  screen1.classList.add("hidden");
-  screen2.classList.remove("hidden");
-  createCalendar(days);
-
-  lastDate = new Date().toDateString();
-  localStorage.setItem("lastDate", lastDate);
-  localStorage.setItem("challengeDays", challengeDays);
-  localStorage.setItem("goalText", goal);
-  localStorage.setItem("currentDay", currentDay);
-}
-
-// ---------------- 今日の達成 ----------------
-achieveBtn.addEventListener("click", () => {
+function markDay() {
   const today = new Date().toDateString();
-  const storedDate = localStorage.getItem("lastDate");
+  if (state.lastMarked === today) return; // 1日1回制限
 
-  if (storedDate === today) {
-    alert("今日はすでに達成済みです！");
-    return;
+  if (state.progress < state.days) {
+    state.progress++;
+    state.lastMarked = today;
+    saveState();
+    buildCalendar();
+    successSound.play();
+
+    if (state.progress === state.days) {
+      document.querySelectorAll(".icon").forEach(i => i.classList.add("sparkle"));
+      modal.classList.remove("hidden");
+      formButton.classList.remove("hidden");
+    }
   }
+}
 
-  currentDay++;
-  lastDate = today;
-  localStorage.setItem("lastDate", lastDate);
-  localStorage.setItem("currentDay", currentDay);
-
-  const mask = document.getElementById(`mask-${currentDay}`);
-  if (mask) mask.classList.add("hidden");
-
-  successSound.play();
-
-  checkCompletion();
+document.getElementById("start-14").addEventListener("click", () => {
+  if (!goalInput.value.trim()) return alert("目標を入力してください");
+  state.goal = goalInput.value.trim();
+  state.days = 14;
+  state.progress = 0;
+  state.lastMarked = "";
+  saveState();
+  goalText.textContent = state.goal;
+  buildCalendar();
+  showScreen(calendarScreen);
 });
 
-// ---------------- 達成判定 ----------------
-function checkCompletion() {
-  let allCleared = true;
-  for (let i = 1; i <= challengeDays; i++) {
-    const mask = document.getElementById(`mask-${i}`);
-    if (mask && !mask.classList.contains("hidden")) {
-      allCleared = false;
-      break;
-    }
-  }
+document.getElementById("start-30").addEventListener("click", () => {
+  if (!goalInput.value.trim()) return alert("目標を入力してください");
+  state.goal = goalInput.value.trim();
+  state.days = 30;
+  state.progress = 0;
+  state.lastMarked = "";
+  saveState();
+  goalText.textContent = state.goal;
+  buildCalendar();
+  showScreen(calendarScreen);
+});
 
-  if (allCleared) {
-    for (let i = 1; i <= challengeDays; i++) {
-      const stamp = calendar.querySelector(`.square:nth-child(${i}) .stamp`);
-      if (stamp) stamp.classList.add("glow");
-    }
-    formBtn.classList.remove("hidden");
-    showModal();
-  }
-}
+dailyButton.addEventListener("click", markDay);
 
-// ---------------- モーダル制御 ----------------
-function showModal() {
-  modal.classList.remove("hidden");
-}
+formButton.addEventListener("click", () => {
+  window.open(FORM_URL, "_blank");
+});
 
 confirmReset.addEventListener("click", () => {
   modal.classList.add("hidden");
   resetApp();
-  setTimeout(() => {
-    window.open(
-      "https://docs.google.com/forms/d/e/1FAIpQLSc9X2GgBDBuM29HJx37j_eUykUujmIHVQpapsl2ckc26TzD8g/viewform?usp=header",
-      "_blank"
-    );
-  }, 100);
+  setTimeout(() => window.open(FORM_URL, "_blank"), 200);
 });
 
 cancelReset.addEventListener("click", () => {
   modal.classList.add("hidden");
 });
 
-// ---------------- 手動モード切替 ----------------
-goalText.addEventListener("click", () => {
-  handleSpecialClick(() => {
-    manualMode = !manualMode;
-    achieveBtn.disabled = manualMode;
-  });
-});
-
-function updateManualProgress(index) {
-  currentDay = index;
-  for (let i = 1; i <= challengeDays; i++) {
-    const mask = document.getElementById(`mask-${i}`);
-    if (mask) {
-      if (i <= index) {
-        mask.classList.add("hidden");
-      } else {
-        mask.classList.remove("hidden");
-      }
-    }
-  }
-  successSound.play();
-  checkCompletion();
+// 初期ロード
+loadState();
+if (state.goal && state.days > 0) {
+  goalText.textContent = state.goal;
+  buildCalendar();
+  showScreen(calendarScreen);
+} else {
+  showScreen(startScreen);
 }
 
-// ---------------- 特殊クリック判定 ----------------
-function handleSpecialClick(callback) {
-  clickCount++;
-  if (clickCount === 1) {
-    clickTimer = setTimeout(() => {
-      clickCount = 0;
-    }, 3000);
-  }
-  if (clickCount >= 5) {
-    clearTimeout(clickTimer);
-    clickCount = 0;
-    callback();
-  }
-}
-
-// ---------------- ページ読み込み時の復元 ----------------
-window.addEventListener("load", () => {
-  const savedGoal = localStorage.getItem("goalText");
-  const savedDays = parseInt(localStorage.getItem("challengeDays"), 10);
-  const savedCurrent = parseInt(localStorage.getItem("currentDay"), 10);
-  const savedDate = localStorage.getItem("lastDate");
-
-  if (savedGoal && savedDays) {
-    challengeDays = savedDays;
-    currentDay = savedCurrent || 0;
-    lastDate = savedDate || null;
-
-    goalText.textContent = savedGoal;
-    screen1.classList.add("hidden");
-    screen2.classList.remove("hidden");
-    createCalendar(challengeDays);
-
-    for (let i = 1; i <= currentDay; i++) {
-      const mask = document.getElementById(`mask-${i}`);
-      if (mask) mask.classList.add("hidden");
-    }
-
-    checkCompletion();
-
-    const today = new Date().toDateString();
-    if (lastDate !== today) {
-      achieveBtn.disabled = false;
-      manualMode = false;
-    } else {
-      achieveBtn.disabled = true;
-    }
-  }
-});
 
