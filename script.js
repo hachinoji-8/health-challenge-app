@@ -104,9 +104,8 @@ function loadProgress() {
     challengeDays = savedDays;
     startScreen.classList.add('hidden');
     calendarScreen.classList.remove('hidden');
-    createCalendar(challengeDays);
-
     markedCount = isNaN(savedCount) ? 0 : savedCount;
+    createCalendar(challengeDays);
     updateCovers();
     updateSubmitButton();
   }
