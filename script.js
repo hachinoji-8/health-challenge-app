@@ -16,21 +16,23 @@ let markedCount = 0;
 let manualMode = false;
 let manualModeReady = false;
 
-// 🕶 隠し術のコメント表示
+// 🕶 コメント表示用の術
 function setupSecretCommentBox() {
   const commentBox = document.createElement('div');
   commentBox.id = 'secret-comment';
-  commentBox.style.position = 'fixed';
-  commentBox.style.bottom = '20px';
-  commentBox.style.left = '50%';
-  commentBox.style.transform = 'translateX(-50%)';
-  commentBox.style.padding = '8px 16px';
-  commentBox.style.background = 'rgba(0,0,0,0.7)';
-  commentBox.style.color = '#fff';
-  commentBox.style.borderRadius = '8px';
-  commentBox.style.fontSize = '14px';
-  commentBox.style.zIndex = '9999';
-  commentBox.style.display = 'none';
+  Object.assign(commentBox.style, {
+    position: 'fixed',
+    bottom: '20px',
+    left: '50%',
+    transform: 'translateX(-50%)',
+    padding: '8px 16px',
+    background: 'rgba(0,0,0,0.7)',
+    color: '#fff',
+    borderRadius: '8px',
+    fontSize: '14px',
+    zIndex: '9999',
+    display: 'none'
+  });
   document.body.appendChild(commentBox);
 
   return function showComment(text) {
@@ -47,42 +49,66 @@ function setupSecretTriggers() {
   const showComment = setupSecretCommentBox();
 
   const calendarDays = document.querySelectorAll('.calendar-day');
-  if (calendarDays.length === 0) return;
+  const goalEl = document.getElementById('goal-display');
+  const firstDay = calendarDays[0];
+  const lastDay = calendarDays[calendarDays.length - 1];
+
+  console.log('🔍 隠し領域の術：初期化開始');
+  console.log('📌 calendarDays:', calendarDays.length);
+  console.log('📌 goal-display:', !!goalEl);
+  console.log('📌 firstDay:', !!firstDay);
+  console.log('📌 lastDay:', !!lastDay);
+
+  if (!goalEl || !firstDay || !lastDay) {
+    console.warn('⚠️ 隠し領域のいずれかが見つかりませぬ');
+    return;
+  }
 
   const triggers = [
     {
-      element: goalDisplay,
+      name: 'リセットの術',
+      element: goalEl,
       action: () => {
         localStorage.clear();
         showComment('リセットの術、発動！');
+        console.log('✅ リセットの術、発動');
       }
     },
     {
-      element: calendarDays[0],
+      name: '復活の術',
+      element: firstDay,
       action: () => {
         setMarkButtonActive(true);
         showComment('復活の術、発動！');
+        console.log('✅ 復活の術、発動');
       }
     },
     {
-      element: calendarDays[calendarDays.length - 1],
+      name: '手動モードの術',
+      element: lastDay,
       action: () => {
-        if (!manualModeReady) return;
+        if (!manualModeReady) {
+          console.warn('⚠️ 手動モードの術はまだ仕込まれておりませぬ');
+          return;
+        }
         manualMode = !manualMode;
         manualModeBtn.textContent = manualMode ? '🛠 手動モード：ON' : '🛠 手動モード：OFF';
         manualModeBtn.classList.toggle('active', manualMode);
         showComment('手動モードの術、発動！');
+        console.log('✅ 手動モードの術、発動');
       }
     }
   ];
 
-  triggers.forEach(({ element, action }) => {
+  triggers.forEach(({ name, element, action }) => {
     let tapCount = 0;
 
     element.addEventListener('click', (e) => {
       e.stopPropagation();
       tapCount++;
+      console.log(`🌀 ${name} タップ数: ${tapCount}`);
       if (tapCount >= 10) {
+        console.log(`✨ ${name} 発動条件達成`);
         action();
         tapCount = 0;
       }
@@ -90,10 +116,15 @@ function setupSecretTriggers() {
 
     document.body.addEventListener('click', (e) => {
       if (!element.contains(e.target)) {
+        if (tapCount > 0) {
+          console.log(`🔄 ${name} カウントリセット`);
+        }
         tapCount = 0;
       }
     });
   });
+
+  console.log('✅ 隠し領域の術：仕込み完了');
 }
 
 // 🏮 記録の術：保存
@@ -163,7 +194,7 @@ function startChallenge(days) {
   setMarkButtonActive(isNewDay());
 }
 
-// 🗓 カレンダー生成＋手動モードの術
+// 🗓 カレンダー生成＋隠し術の仕込み
 function createCalendar(days) {
   calendar.innerHTML = '';
   manualModeReady = true;
@@ -196,7 +227,7 @@ function createCalendar(days) {
     calendar.appendChild(day);
   }
 
-  setupSecretTriggers(); // ← カレンダー生成後に隠し術を仕込む
+  setupSecretTriggers(); // ← ここで隠し術を仕込む
 }
 
 // 🧩 カバーの更新
@@ -242,6 +273,7 @@ markTodayBtn.onclick = () => {
     updateSubmitButton();
   }
 };
+
 // ✴ 応募フォームへ ✴
 submitFormBtn.onclick = () => {
   if (!submitFormBtn.classList.contains('disabled')) {
@@ -277,3 +309,4 @@ window.addEventListener('DOMContentLoaded', () => {
   setMarkButtonActive(isNewDay());
   setupChallengeButtons();
 });
+     
