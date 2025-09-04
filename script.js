@@ -16,13 +16,17 @@ function createCalendar(days) {
     const day = document.createElement('div');
     day.classList.add('calendar-day');
 
+    const base = document.createElement('div');
+    base.classList.add('circle-base');
+    day.appendChild(base);
+
     const stamp = document.createElement('img');
     stamp.classList.add('stamp');
     stamp.src = (i + 1) % 7 === 0 ? 'img/smile.png' : 'img/heart.png';
     day.appendChild(stamp);
 
     const cover = document.createElement('div');
-    cover.classList.add('calendar-day', 'cover');
+    cover.classList.add('cover');
     day.appendChild(cover);
 
     calendar.appendChild(day);
@@ -47,7 +51,7 @@ document.getElementById('start-14').onclick = () => startChallenge(14);
 document.getElementById('start-30').onclick = () => startChallenge(30);
 
 markTodayBtn.onclick = () => {
-  const covers = document.querySelectorAll('.calendar-day.cover');
+  const covers = document.querySelectorAll('.cover');
   if (covers.length > 0) {
     covers[0].remove();
     markedCount++;
