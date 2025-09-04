@@ -218,7 +218,7 @@ function updateCovers() {
   }
 }
 
-// ✴ 応募ボタンの状態更新（>= に修正済）
+// ✴ 応募ボタンの状態更新
 function updateSubmitButton() {
   if (markedCount >= challengeDays) {
     submitFormBtn.classList.remove('disabled');
@@ -254,10 +254,11 @@ submitFormBtn.onclick = () => {
 // 🔁 今日のチャレンジ復活の術（物理ボタン）
 reviveBtn.onclick = () => {
   setMarkButtonActive(true);
-  alert('本日分の達成ボタンが復活いたしましたぞ');
+  alert('本日分の達成ボタンが復活復活いたしましたぞ');
 };
 
-// 🛠 手動モードの術（物理ボタン）
+
+
 manualModeBtn.onclick = () => {
   manualMode = !manualMode;
   manualModeBtn.textContent = manualMode ? '🛠 手動モード：ON' : '🛠 手動モード：OFF';
@@ -279,5 +280,3 @@ window.addEventListener('DOMContentLoaded', () => {
   setMarkButtonActive(isNewDay());
   setupChallengeButtons();
 });
-
-
