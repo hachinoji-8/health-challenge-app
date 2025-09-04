@@ -14,6 +14,7 @@ const disappearBtn = document.getElementById('disappear');
 
 let challengeDays = 0;
 let markedCount = 0;
+let manualMode = false; // 🛠 手動モードの状態
 
 // 🏮 記録の術：保存
 function saveProgress() {
@@ -38,15 +39,8 @@ function loadProgress() {
     createCalendar(challengeDays);
 
     markedCount = isNaN(savedCount) ? 0 : savedCount;
-    const covers = document.querySelectorAll('.cover');
-    for (let i = 0; i < markedCount && i < covers.length; i++) {
-      covers[i].remove();
-    }
-
-    if (markedCount === challengeDays) {
-      submitFormBtn.classList.remove('disabled');
-      submitFormBtn.classList.add('sparkle');
-    }
+    updateCovers();
+    updateSubmitButton();
   }
 }
 
@@ -63,7 +57,7 @@ function setMarkButtonActive(active) {
   markTodayBtn.disabled = !active;
 }
 
-// 🗡 チャレンジボタンの仕込み（再利用可能）
+// 🗡 チャレンジボタンの仕込み
 function setupChallengeButtons() {
   document.getElementById('start-14').onclick = () => startChallenge(14);
   document.getElementById('start-30').onclick = () => startChallenge(30);
@@ -78,7 +72,6 @@ function startChallenge(days) {
     return;
   }
 
-  // 30日チャレンジ → 14日扱いに丸める（ドロン後の再選択時）
   if (days === 14 && challengeDays === 30 && markedCount >= 14) {
     challengeDays = 14;
     markedCount = 14;
@@ -90,25 +83,13 @@ function startChallenge(days) {
   startScreen.classList.add('hidden');
   calendarScreen.classList.remove('hidden');
   createCalendar(challengeDays);
-
-  const covers = document.querySelectorAll('.cover');
-  for (let i = 0; i < markedCount && i < covers.length; i++) {
-    covers[i].remove();
-  }
-
-  if (markedCount === challengeDays) {
-    submitFormBtn.classList.remove('disabled');
-    submitFormBtn.classList.add('sparkle');
-  } else {
-    submitFormBtn.classList.add('disabled');
-    submitFormBtn.classList.remove('sparkle');
-  }
-
+  updateCovers();
+  updateSubmitButton();
   saveProgress();
   setMarkButtonActive(isNewDay());
 }
 
-// 🗓 カレンダー生成
+// 🗓 カレンダー生成＋手動モードの術
 function createCalendar(days) {
   calendar.innerHTML = '';
   for (let i = 0; i < days; i++) {
@@ -128,13 +109,50 @@ function createCalendar(days) {
     cover.classList.add('cover');
     day.appendChild(cover);
 
+    // 🛠 手動モードの術：クリックで調整
+    day.onclick = () => {
+      if (!manualMode) return;
+      markedCount = i + 1;
+      updateCovers();
+      updateSubmitButton();
+      saveProgress();
+    };
+
     calendar.appendChild(day);
+  }
+}
+
+// 🧩 カバーの更新
+function updateCovers() {
+  const covers = document.querySelectorAll('.calendar-day');
+  for (let i = 0; i < covers.length; i++) {
+    const cover = covers[i].querySelector('.cover');
+    if (i < markedCount) {
+      if (cover) cover.remove();
+    } else {
+      if (!cover) {
+        const newCover = document.createElement('div');
+        newCover.classList.add('cover');
+        covers[i].appendChild(newCover);
+      }
+    }
+  }
+}
+
+// ✴ 応募ボタンの状態更新
+function updateSubmitButton() {
+  if (markedCount === challengeDays) {
+    submitFormBtn.classList.remove('disabled');
+    submitFormBtn.classList.add('sparkle');
+  } else {
+    submitFormBtn.classList.add('disabled');
+    submitFormBtn.classList.remove('sparkle');
   }
 }
 
 // 🎯 今日の達成
 markTodayBtn.onclick = () => {
-  if (markTodayBtn.disabled) return;
+  if (markTodayBtn.disabled || manualMode) return;
 
   const covers = document.querySelectorAll('.cover');
   if (covers.length > 0) {
@@ -143,11 +161,7 @@ markTodayBtn.onclick = () => {
     successSound.play();
     saveProgress();
     setMarkButtonActive(false);
-
-    if (markedCount === challengeDays) {
-      submitFormBtn.classList.remove('disabled');
-      submitFormBtn.classList.add('sparkle');
-    }
+    updateSubmitButton();
   }
 };
 
@@ -158,27 +172,29 @@ submitFormBtn.onclick = () => {
   }
 };
 
-// 🔁 今日のチャレンジ復活の術（テスト用）
+// 🔁 今日のチャレンジ復活の術
 reviveBtn.onclick = () => {
   setMarkButtonActive(true);
   alert('本日分の達成ボタンが復活いたしましたぞ');
 };
 
-// 🛠 手動モードの術（未実装）
+// 🛠 手動モードの術（トグル式）
 manualModeBtn.onclick = () => {
-  alert('手動モードの術はまだ仕込まれておりませぬ');
+  manualMode = !manualMode;
+  manualModeBtn.textContent = manualMode ? '🛠 手動モード：ON' : '🛠 手動モード：OFF';
+  manualModeBtn.classList.toggle('active', manualMode);
 };
 
-// 🕶 ドロンの術（実装済）
+// 🕶 ドロンの術
 disappearBtn.onclick = () => {
   goalInput.value = goalDisplay.textContent;
   startScreen.classList.remove('hidden');
   calendarScreen.classList.add('hidden');
-  setupChallengeButtons(); // 再仕込み
+  setupChallengeButtons();
   saveProgress();
 };
 
-// 📜 ページ読み込み時に記録を復元＋チャレンジボタン仕込み
+// 📜 初期化
 window.addEventListener('DOMContentLoaded', () => {
   loadProgress();
   setMarkButtonActive(isNewDay());
