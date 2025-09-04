@@ -63,6 +63,12 @@ function setMarkButtonActive(active) {
   markTodayBtn.disabled = !active;
 }
 
+// 🗡 チャレンジボタンの仕込み（再利用可能）
+function setupChallengeButtons() {
+  document.getElementById('start-14').onclick = () => startChallenge(14);
+  document.getElementById('start-30').onclick = () => startChallenge(30);
+}
+
 // 🎯 チャレンジ開始
 function startChallenge(days) {
   const goal = goalInput.value.trim();
@@ -166,19 +172,15 @@ manualModeBtn.onclick = () => {
 // 🕶 ドロンの術（実装済）
 disappearBtn.onclick = () => {
   goalInput.value = goalDisplay.textContent;
-
   startScreen.classList.remove('hidden');
   calendarScreen.classList.add('hidden');
-
+  setupChallengeButtons(); // 再仕込み
   saveProgress();
 };
 
-// 📜 ページ読み込み時に記録を復元＋チャレンジボタン再仕込み
+// 📜 ページ読み込み時に記録を復元＋チャレンジボタン仕込み
 window.addEventListener('DOMContentLoaded', () => {
   loadProgress();
   setMarkButtonActive(isNewDay());
-
-  // チャレンジボタンの再仕込み
-  document.getElementById('start-14').onclick = () => startChallenge(14);
-  document.getElementById('start-30').onclick = () => startChallenge(30);
+  setupChallengeButtons();
 });
