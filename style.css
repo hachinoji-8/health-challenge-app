@@ -38,7 +38,6 @@ button.disabled {
   pointer-events: none;
 }
 
-/* カレンダー全体を中央に配置 */
 #calendar-wrapper {
   display: flex;
   justify-content: center;
@@ -47,9 +46,9 @@ button.disabled {
 
 #calendar {
   display: grid;
-  grid-template-columns: repeat(7, 40px); /* 7列固定 */
+  grid-template-columns: repeat(7, 40px);
   gap: 10px;
-  width: calc(7 * 40px + 6 * 10px); /* 7個＋6つの隙間 */
+  width: calc(7 * 40px + 6 * 10px);
 }
 
 .calendar-day {
@@ -89,7 +88,6 @@ button.disabled {
   z-index: 2;
 }
 
-/* ✨ 応募フォームへ ✨ 光る演出 */
 .sparkle {
   animation: sparkle 1s infinite;
 }
@@ -98,4 +96,9 @@ button.disabled {
   0%   { filter: drop-shadow(0 0 5px gold); }
   50%  { filter: drop-shadow(0 0 10px orange); }
   100% { filter: drop-shadow(0 0 5px gold); }
+}
+
+/* 🧪 テスト用ボタン群 */
+#debug-buttons {
+  margin-top: 1em;
 }
