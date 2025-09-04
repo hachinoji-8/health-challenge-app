@@ -14,7 +14,8 @@ const disappearBtn = document.getElementById('disappear');
 
 let challengeDays = 0;
 let markedCount = 0;
-let manualMode = false; // 🛠 手動モードの状態
+let manualMode = false;
+let manualModeReady = false; // 🛡 発動確認用
 
 // 🏮 記録の術：保存
 function saveProgress() {
@@ -92,6 +93,8 @@ function startChallenge(days) {
 // 🗓 カレンダー生成＋手動モードの術
 function createCalendar(days) {
   calendar.innerHTML = '';
+  manualModeReady = true;
+
   for (let i = 0; i < days; i++) {
     const day = document.createElement('div');
     day.classList.add('calendar-day');
@@ -109,7 +112,6 @@ function createCalendar(days) {
     cover.classList.add('cover');
     day.appendChild(cover);
 
-    // 🛠 手動モードの術：クリックで調整
     day.onclick = () => {
       if (!manualMode) return;
       markedCount = i + 1;
@@ -122,18 +124,19 @@ function createCalendar(days) {
   }
 }
 
-// 🧩 カバーの更新
+// 🧩 カバーの更新（確実に切り替える）
 function updateCovers() {
-  const covers = document.querySelectorAll('.calendar-day');
-  for (let i = 0; i < covers.length; i++) {
-    const cover = covers[i].querySelector('.cover');
+  const days = document.querySelectorAll('.calendar-day');
+  for (let i = 0; i < days.length; i++) {
+    const existingCover = days[i].querySelector('.cover');
+
     if (i < markedCount) {
-      if (cover) cover.remove();
+      if (existingCover) existingCover.remove();
     } else {
-      if (!cover) {
+      if (!existingCover) {
         const newCover = document.createElement('div');
         newCover.classList.add('cover');
-        covers[i].appendChild(newCover);
+        days[i].appendChild(newCover);
       }
     }
   }
@@ -178,8 +181,13 @@ reviveBtn.onclick = () => {
   alert('本日分の達成ボタンが復活いたしましたぞ');
 };
 
-// 🛠 手動モードの術（トグル式）
+// 🛠 手動モードの術（トグル式＋発動確認）
 manualModeBtn.onclick = () => {
+  if (!manualModeReady) {
+    alert('手動モードの術はまだ仕込まれておりませぬ');
+    return;
+  }
+
   manualMode = !manualMode;
   manualModeBtn.textContent = manualMode ? '🛠 手動モード：ON' : '🛠 手動モード：OFF';
   manualModeBtn.classList.toggle('active', manualMode);
