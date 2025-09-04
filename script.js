@@ -71,11 +71,33 @@ function startChallenge(days) {
     goalInput.value = '';
     return;
   }
-  challengeDays = days;
+
+  // 30日チャレンジ → 14日扱いに丸める（ドロン後の再選択時）
+  if (days === 14 && challengeDays === 30 && markedCount >= 14) {
+    challengeDays = 14;
+    markedCount = 14;
+  } else {
+    challengeDays = days;
+  }
+
   goalDisplay.textContent = goal;
   startScreen.classList.add('hidden');
   calendarScreen.classList.remove('hidden');
-  createCalendar(days);
+  createCalendar(challengeDays);
+
+  const covers = document.querySelectorAll('.cover');
+  for (let i = 0; i < markedCount && i < covers.length; i++) {
+    covers[i].remove();
+  }
+
+  if (markedCount === challengeDays) {
+    submitFormBtn.classList.remove('disabled');
+    submitFormBtn.classList.add('sparkle');
+  } else {
+    submitFormBtn.classList.add('disabled');
+    submitFormBtn.classList.remove('sparkle');
+  }
+
   saveProgress();
   setMarkButtonActive(isNewDay());
 }
@@ -141,9 +163,31 @@ manualModeBtn.onclick = () => {
   alert('手動モードの術はまだ仕込まれておりませぬ');
 };
 
-// 🕶 ドロンの術（未実装）
+// 🕶 ドロンの術（実装済）
 disappearBtn.onclick = () => {
-  alert('ドロンの術はまだ姿を現しておりませぬ');
+  goalInput.value = goalDisplay.textContent;
+
+  // 画面切り替え
+  startScreen.classList.remove('hidden');
+  calendarScreen.classList.add('hidden');
+
+  // カレンダー再生成（保持された challengeDays に基づく）
+  createCalendar(challengeDays);
+
+  const covers = document.querySelectorAll('.cover');
+  for (let i = 0; i < markedCount && i < covers.length; i++) {
+    covers[i].remove();
+  }
+
+  if (markedCount === challengeDays) {
+    submitFormBtn.classList.remove('disabled');
+    submitFormBtn.classList.add('sparkle');
+  } else {
+    submitFormBtn.classList.add('disabled');
+    submitFormBtn.classList.remove('sparkle');
+  }
+
+  saveProgress();
 };
 
 // 📜 ページ読み込み時に記録を復元
