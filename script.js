@@ -7,6 +7,11 @@ const markTodayBtn = document.getElementById('mark-today');
 const submitFormBtn = document.getElementById('submit-form');
 const successSound = document.getElementById('success-sound');
 
+// 🧪 テスト用ボタン
+const reviveBtn = document.getElementById('revive-today');
+const manualModeBtn = document.getElementById('manual-mode');
+const disappearBtn = document.getElementById('disappear');
+
 let challengeDays = 0;
 let markedCount = 0;
 
@@ -45,14 +50,21 @@ function loadProgress() {
   }
 }
 
-// 📅 日またぎ判定の術
+// 📅 日またぎ判定
 function isNewDay() {
   const last = localStorage.getItem('lastOpenedDate');
   const today = new Date().toLocaleDateString('ja-JP');
   return last !== today;
 }
 
-// 🎯 チャレンジ開始の術
+// 🎯 ボタンの状態更新
+function updateMarkButtonState() {
+  const isActive = isNewDay();
+  markTodayBtn.classList.toggle('disabled', !isActive);
+  markTodayBtn.disabled = !isActive;
+}
+
+// 🎯 チャレンジ開始
 function startChallenge(days) {
   const goal = goalInput.value.trim();
   if (goal.length === 0 || goal.length > 20) {
@@ -66,9 +78,10 @@ function startChallenge(days) {
   calendarScreen.classList.remove('hidden');
   createCalendar(days);
   saveProgress();
+  updateMarkButtonState();
 }
 
-// 🗓 カレンダー生成の術
+// 🗓 カレンダー生成
 function createCalendar(days) {
   calendar.innerHTML = '';
   for (let i = 0; i < days; i++) {
@@ -92,7 +105,7 @@ function createCalendar(days) {
   }
 }
 
-// 🎯 今日の達成の術
+// 🎯 今日の達成
 markTodayBtn.onclick = () => {
   if (!isNewDay()) {
     alert('今日はすでに達成済みでござる');
@@ -105,6 +118,7 @@ markTodayBtn.onclick = () => {
     markedCount++;
     successSound.play();
     saveProgress();
+    updateMarkButtonState();
 
     if (markedCount === challengeDays) {
       submitFormBtn.classList.remove('disabled');
@@ -120,5 +134,25 @@ submitFormBtn.onclick = () => {
   }
 };
 
+// 🔁 今日のチャレンジ復活の術（テスト用）
+reviveBtn.onclick = () => {
+  localStorage.setItem('lastOpenedDate', ''); // 空にして日またぎ判定を通す
+  updateMarkButtonState();
+  alert('本日分の達成ボタンが復活いたしましたぞ');
+};
+
+// 🛠 手動モードの術（未実装）
+manualModeBtn.onclick = () => {
+  alert('手動モードの術はまだ仕込まれておりませぬ');
+};
+
+// 🕶 ドロンの術（未実装）
+disappearBtn.onclick = () => {
+  alert('ドロンの術はまだ姿を現しておりませぬ');
+};
+
 // 📜 ページ読み込み時に記録を復元
-window.addEventListener('DOMContentLoaded', loadProgress);
+window.addEventListener('DOMContentLoaded', () => {
+  loadProgress();
+  updateMarkButtonState();
+});
