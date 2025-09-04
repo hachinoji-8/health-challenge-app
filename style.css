@@ -45,11 +45,11 @@ button.disabled {
   margin: 1em 0;
 }
 
-/* カレンダーの中身は左詰めで7列 */
 #calendar {
   display: grid;
-  grid-template-columns: repeat(7, 40px);
+  grid-template-columns: repeat(7, 40px); /* 7列固定 */
   gap: 10px;
+  width: calc(7 * 40px + 6 * 10px); /* 7個＋6つの隙間 */
 }
 
 .calendar-day {
