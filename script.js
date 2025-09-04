@@ -207,7 +207,7 @@ function updateCovers() {
 
 // ✴ 応募ボタンの状態更新
 function updateSubmitButton() {
-  if (markedCount === challengeDays) {
+  if (markedCount >= challengeDays) {
     submitFormBtn.classList.remove('disabled');
     submitFormBtn.classList.add('sparkle');
   } else {
