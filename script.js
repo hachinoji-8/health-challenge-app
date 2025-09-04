@@ -16,7 +16,7 @@ let markedCount = 0;
 let manualMode = false;
 let manualModeReady = false;
 
-// 🕶 コメント表示の術
+// 🕶 トースト表示の術
 function setupSecretCommentBox() {
   let commentBox = document.getElementById('secret-comment');
   if (!commentBox) {
@@ -47,7 +47,7 @@ function setupSecretCommentBox() {
   };
 }
 
-// 🧙‍♂️ 隠し領域の術（ボタンに結びつけ）
+// 🧙‍♂️ 隠し術の仕込み（トーストのみ）
 function setupSecretTriggers() {
   const showComment = setupSecretCommentBox();
 
@@ -67,8 +67,7 @@ function setupSecretTriggers() {
   triggers.forEach(({ element, message }) => {
     let tapCount = 0;
 
-    element.addEventListener('pointerdown', (e) => {
-      e.stopPropagation();
+    element.addEventListener('pointerdown', () => {
       tapCount++;
       if (tapCount >= 10) {
         showComment(message);
@@ -82,6 +81,19 @@ function setupSecretTriggers() {
       }
     });
   });
+}
+
+// 📊 カバーから達成数を数え直す術
+function recalculateMarkedCount() {
+  const days = document.querySelectorAll('.calendar-day');
+  let count = 0;
+  for (let i = 0; i < days.length; i++) {
+    if (!days[i].querySelector('.cover')) {
+      count++;
+    }
+  }
+  markedCount = count;
+  updateSubmitButton();
 }
 
 // 🏮 記録の術：保存
@@ -146,7 +158,7 @@ function startChallenge(days) {
   calendarScreen.classList.remove('hidden');
   createCalendar(challengeDays);
   updateCovers();
-  updateSubmitButton();
+  recalculateMarkedCount();
   saveProgress();
   setMarkButtonActive(isNewDay());
 }
@@ -184,7 +196,8 @@ function createCalendar(days) {
     calendar.appendChild(day);
   }
 
-  setupSecretTriggers(); // ← 隠し術の仕込み
+  setupSecretTriggers();
+  recalculateMarkedCount();
 }
 
 // 🧩 カバーの更新
@@ -234,35 +247,4 @@ markTodayBtn.onclick = () => {
 // ✴ 応募フォームへ ✴
 submitFormBtn.onclick = () => {
   if (!submitFormBtn.classList.contains('disabled')) {
-    window.open('https://docs.google.com/forms/d/1cRD9TaL2ttqSduD3FfO4jtGHO9yhNK18Xqdk21pQEW8/viewform', '_blank');
-  }
-};
-
-// 🔁 今日のチャレンジ復活の術（物理ボタン）
-reviveBtn.onclick = () => {
-  setMarkButtonActive(true);
-  alert('本日分の達成ボタンが復活いたしましたぞ');
-};
-
-// 🛠 手動モードの術（物理ボタン）
-manualModeBtn.onclick = () => {
-  manualMode = !manualMode;
-  manualModeBtn.textContent = manualMode ? '🛠 手動モード：ON' : '🛠 手動モード：OFF';
-  manualModeBtn.classList.toggle('active', manualMode);
-};
-
-// 🕶 ドロンの術（物理ボタン）
-disappearBtn.onclick = () => {
-  goalInput.value = goalDisplay.textContent;
-  startScreen.classList.remove('hidden');
-    calendarScreen.classList.add('hidden');
-  setupChallengeButtons();
-  saveProgress();
-};
-
-// 📜 初期化
-window.addEventListener('DOMContentLoaded', () => {
-  loadProgress();
-  setMarkButtonActive(isNewDay());
-  setupChallengeButtons();
-});
+    window.open('https://docs.google.com/forms/d/1cRD9
