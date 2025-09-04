@@ -16,7 +16,7 @@ let markedCount = 0;
 let manualMode = false;
 let manualModeReady = false;
 
-// 🕶 トースト表示の術
+// 🕶 コメント表示の術
 function setupSecretCommentBox() {
   let commentBox = document.getElementById('secret-comment');
   if (!commentBox) {
@@ -47,7 +47,7 @@ function setupSecretCommentBox() {
   };
 }
 
-// 🧙‍♂️ 隠し術の仕込み（トーストのみ）
+// 🧙‍♂️ 隠し領域の術（ボタンに結びつけ）
 function setupSecretTriggers() {
   const showComment = setupSecretCommentBox();
 
@@ -67,7 +67,8 @@ function setupSecretTriggers() {
   triggers.forEach(({ element, message }) => {
     let tapCount = 0;
 
-    element.addEventListener('pointerdown', () => {
+    element.addEventListener('pointerdown', (e) => {
+      e.stopPropagation();
       tapCount++;
       if (tapCount >= 10) {
         showComment(message);
@@ -81,19 +82,6 @@ function setupSecretTriggers() {
       }
     });
   });
-}
-
-// 📊 カバーから達成数を数え直す術
-function recalculateMarkedCount() {
-  const days = document.querySelectorAll('.calendar-day');
-  let count = 0;
-  for (let i = 0; i < days.length; i++) {
-    if (!days[i].querySelector('.cover')) {
-      count++;
-    }
-  }
-  markedCount = count;
-  updateSubmitButton();
 }
 
 // 🏮 記録の術：保存
@@ -158,7 +146,7 @@ function startChallenge(days) {
   calendarScreen.classList.remove('hidden');
   createCalendar(challengeDays);
   updateCovers();
-  recalculateMarkedCount();
+  updateSubmitButton();
   saveProgress();
   setMarkButtonActive(isNewDay());
 }
@@ -196,8 +184,7 @@ function createCalendar(days) {
     calendar.appendChild(day);
   }
 
-  setupSecretTriggers();
-  recalculateMarkedCount();
+  setupSecretTriggers(); // ← 隠し術の仕込み
 }
 
 // 🧩 カバーの更新
@@ -220,7 +207,7 @@ function updateCovers() {
 
 // ✴ 応募ボタンの状態更新
 function updateSubmitButton() {
-  if (markedCount >= challengeDays) {
+  if (markedCount === challengeDays) {
     submitFormBtn.classList.remove('disabled');
     submitFormBtn.classList.add('sparkle');
   } else {
@@ -254,11 +241,10 @@ submitFormBtn.onclick = () => {
 // 🔁 今日のチャレンジ復活の術（物理ボタン）
 reviveBtn.onclick = () => {
   setMarkButtonActive(true);
-  alert('本日分の達成ボタンが復活復活いたしましたぞ');
+  alert('本日分の達成ボタンが復活いたしましたぞ');
 };
 
-
-
+// 🛠 手動モードの術（物理ボタン）
 manualModeBtn.onclick = () => {
   manualMode = !manualMode;
   manualModeBtn.textContent = manualMode ? '🛠 手動モード：ON' : '🛠 手動モード：OFF';
@@ -269,7 +255,7 @@ manualModeBtn.onclick = () => {
 disappearBtn.onclick = () => {
   goalInput.value = goalDisplay.textContent;
   startScreen.classList.remove('hidden');
-  calendarScreen.classList.add('hidden');
+    calendarScreen.classList.add('hidden');
   setupChallengeButtons();
   saveProgress();
 };
