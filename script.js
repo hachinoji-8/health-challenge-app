@@ -258,4 +258,26 @@ reviveBtn.onclick = () => {
 };
 
 // 🛠 手動モードの術（物理ボタン）
-manualModeBtn.onclick = ()
+manualModeBtn.onclick = () => {
+  manualMode = !manualMode;
+  manualModeBtn.textContent = manualMode ? '🛠 手動モード：ON' : '🛠 手動モード：OFF';
+  manualModeBtn.classList.toggle('active', manualMode);
+};
+
+// 🕶 ドロンの術（物理ボタン）
+disappearBtn.onclick = () => {
+  goalInput.value = goalDisplay.textContent;
+  startScreen.classList.remove('hidden');
+  calendarScreen.classList.add('hidden');
+  setupChallengeButtons();
+  saveProgress();
+};
+
+// 📜 初期化
+window.addEventListener('DOMContentLoaded', () => {
+  loadProgress();
+  setMarkButtonActive(isNewDay());
+  setupChallengeButtons();
+});
+
+
