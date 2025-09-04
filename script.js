@@ -7,7 +7,6 @@ const markTodayBtn = document.getElementById('mark-today');
 const submitFormBtn = document.getElementById('submit-form');
 const successSound = document.getElementById('success-sound');
 
-// 🧪 テスト用ボタン
 const reviveBtn = document.getElementById('revive-today');
 const manualModeBtn = document.getElementById('manual-mode');
 const disappearBtn = document.getElementById('disappear');
@@ -15,7 +14,87 @@ const disappearBtn = document.getElementById('disappear');
 let challengeDays = 0;
 let markedCount = 0;
 let manualMode = false;
-let manualModeReady = false; // 🛡 発動確認用
+let manualModeReady = false;
+
+// 🕶 隠し術のコメント表示
+function setupSecretCommentBox() {
+  const commentBox = document.createElement('div');
+  commentBox.id = 'secret-comment';
+  commentBox.style.position = 'fixed';
+  commentBox.style.bottom = '20px';
+  commentBox.style.left = '50%';
+  commentBox.style.transform = 'translateX(-50%)';
+  commentBox.style.padding = '8px 16px';
+  commentBox.style.background = 'rgba(0,0,0,0.7)';
+  commentBox.style.color = '#fff';
+  commentBox.style.borderRadius = '8px';
+  commentBox.style.fontSize = '14px';
+  commentBox.style.zIndex = '9999';
+  commentBox.style.display = 'none';
+  document.body.appendChild(commentBox);
+
+  return function showComment(text) {
+    commentBox.textContent = text;
+    commentBox.style.display = 'block';
+    setTimeout(() => {
+      commentBox.style.display = 'none';
+    }, 2000);
+  };
+}
+
+// 🧙‍♂️ 隠し領域の術の仕込み
+function setupSecretTriggers() {
+  const showComment = setupSecretCommentBox();
+
+  const calendarDays = document.querySelectorAll('.calendar-day');
+  if (calendarDays.length === 0) return;
+
+  const triggers = [
+    {
+      element: goalDisplay,
+      action: () => {
+        localStorage.clear();
+        showComment('リセットの術、発動！');
+      }
+    },
+    {
+      element: calendarDays[0],
+      action: () => {
+        setMarkButtonActive(true);
+        showComment('復活の術、発動！');
+      }
+    },
+    {
+      element: calendarDays[calendarDays.length - 1],
+      action: () => {
+        if (!manualModeReady) return;
+        manualMode = !manualMode;
+        manualModeBtn.textContent = manualMode ? '🛠 手動モード：ON' : '🛠 手動モード：OFF';
+        manualModeBtn.classList.toggle('active', manualMode);
+        showComment('手動モードの術、発動！');
+      }
+    }
+  ];
+
+  triggers.forEach(({ element, action }) => {
+    let tapCount = 0;
+
+    element.addEventListener('click', (e) => {
+      e.stopPropagation();
+      tapCount++;
+      if (tapCount >= 10) {
+        action();
+        tapCount = 0;
+      }
+    });
+
+    document.body.addEventListener('click', (e) => {
+      if (!element.contains(e.target)) {
+        tapCount = 0;
+      }
+    });
+  });
+}
 
 // 🏮 記録の術：保存
 function saveProgress() {
@@ -73,13 +152,7 @@ function startChallenge(days) {
     return;
   }
 
-  if (days === 14 && challengeDays === 30 && markedCount >= 14) {
-    challengeDays = 14;
-    markedCount = 14;
-  } else {
-    challengeDays = days;
-  }
-
+  challengeDays = days;
   goalDisplay.textContent = goal;
   startScreen.classList.add('hidden');
   calendarScreen.classList.remove('hidden');
@@ -122,9 +195,11 @@ function createCalendar(days) {
 
     calendar.appendChild(day);
   }
+
+  setupSecretTriggers(); // ← カレンダー生成後に隠し術を仕込む
 }
 
-// 🧩 カバーの更新（確実に切り替える）
+// 🧩 カバーの更新
 function updateCovers() {
   const days = document.querySelectorAll('.calendar-day');
   for (let i = 0; i < days.length; i++) {
@@ -167,7 +242,6 @@ markTodayBtn.onclick = () => {
     updateSubmitButton();
   }
 };
-
 // ✴ 応募フォームへ ✴
 submitFormBtn.onclick = () => {
   if (!submitFormBtn.classList.contains('disabled')) {
@@ -175,25 +249,20 @@ submitFormBtn.onclick = () => {
   }
 };
 
-// 🔁 今日のチャレンジ復活の術
+// 🔁 今日のチャレンジ復活の術（物理ボタン）
 reviveBtn.onclick = () => {
   setMarkButtonActive(true);
   alert('本日分の達成ボタンが復活いたしましたぞ');
 };
 
-// 🛠 手動モードの術（トグル式＋発動確認）
+// 🛠 手動モードの術（物理ボタン）
 manualModeBtn.onclick = () => {
-  if (!manualModeReady) {
-    alert('手動モードの術はまだ仕込まれておりませぬ');
-    return;
-  }
-
   manualMode = !manualMode;
   manualModeBtn.textContent = manualMode ? '🛠 手動モード：ON' : '🛠 手動モード：OFF';
   manualModeBtn.classList.toggle('active', manualMode);
 };
 
-// 🕶 ドロンの術
+// 🕶 ドロンの術（物理ボタン）
 disappearBtn.onclick = () => {
   goalInput.value = goalDisplay.textContent;
   startScreen.classList.remove('hidden');
