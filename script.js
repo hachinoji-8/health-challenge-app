@@ -57,11 +57,10 @@ function isNewDay() {
   return last !== today;
 }
 
-// 🎯 ボタンの状態更新
-function updateMarkButtonState() {
-  const isActive = isNewDay();
-  markTodayBtn.classList.toggle('disabled', !isActive);
-  markTodayBtn.disabled = !isActive;
+// 🎯 ボタンの状態制御
+function setMarkButtonActive(active) {
+  markTodayBtn.classList.toggle('disabled', !active);
+  markTodayBtn.disabled = !active;
 }
 
 // 🎯 チャレンジ開始
@@ -78,7 +77,7 @@ function startChallenge(days) {
   calendarScreen.classList.remove('hidden');
   createCalendar(days);
   saveProgress();
-  updateMarkButtonState();
+  setMarkButtonActive(isNewDay());
 }
 
 // 🗓 カレンダー生成
@@ -107,10 +106,7 @@ function createCalendar(days) {
 
 // 🎯 今日の達成
 markTodayBtn.onclick = () => {
-  if (!isNewDay()) {
-    alert('今日はすでに達成済みでござる');
-    return;
-  }
+  if (markTodayBtn.disabled) return;
 
   const covers = document.querySelectorAll('.cover');
   if (covers.length > 0) {
@@ -118,7 +114,7 @@ markTodayBtn.onclick = () => {
     markedCount++;
     successSound.play();
     saveProgress();
-    updateMarkButtonState();
+    setMarkButtonActive(false);
 
     if (markedCount === challengeDays) {
       submitFormBtn.classList.remove('disabled');
@@ -136,8 +132,7 @@ submitFormBtn.onclick = () => {
 
 // 🔁 今日のチャレンジ復活の術（テスト用）
 reviveBtn.onclick = () => {
-  localStorage.setItem('lastOpenedDate', ''); // 空にして日またぎ判定を通す
-  updateMarkButtonState();
+  setMarkButtonActive(true);
   alert('本日分の達成ボタンが復活いたしましたぞ');
 };
 
@@ -154,5 +149,5 @@ disappearBtn.onclick = () => {
 // 📜 ページ読み込み時に記録を復元
 window.addEventListener('DOMContentLoaded', () => {
   loadProgress();
-  updateMarkButtonState();
+  setMarkButtonActive(isNewDay());
 });
