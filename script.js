@@ -218,9 +218,9 @@ function updateCovers() {
   }
 }
 
-// ✴ 応募ボタンの状態更新
+// ✴ 応募ボタンの状態更新（>= に修正済）
 function updateSubmitButton() {
-  if (markedCount === challengeDays) {
+  if (markedCount >= challengeDays) {
     submitFormBtn.classList.remove('disabled');
     submitFormBtn.classList.add('sparkle');
   } else {
@@ -247,4 +247,15 @@ markTodayBtn.onclick = () => {
 // ✴ 応募フォームへ ✴
 submitFormBtn.onclick = () => {
   if (!submitFormBtn.classList.contains('disabled')) {
-    window.open('https://docs.google.com/forms/d/1cRD9
+    window.open('https://docs.google.com/forms/d/1cRD9TaL2ttqSduD3FfO4jtGHO9yhNK18Xqdk21pQEW8/viewform', '_blank');
+  }
+};
+
+// 🔁 今日のチャレンジ復活の術（物理ボタン）
+reviveBtn.onclick = () => {
+  setMarkButtonActive(true);
+  alert('本日分の達成ボタンが復活いたしましたぞ');
+};
+
+// 🛠 手動モードの術（物理ボタン）
+manualModeBtn.onclick = ()
