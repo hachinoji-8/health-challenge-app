@@ -39,10 +39,10 @@ button.disabled {
 
 #calendar {
   display: grid;
-  grid-template-columns: repeat(7, 40px);
+  grid-template-columns: repeat(7, 40px); /* 1週間＝7列 */
   gap: 10px;
-  justify-content: center;
   margin: 1em auto;
+  justify-content: start; /* 左寄せで自然なカレンダー風に */
 }
 
 .calendar-day {
@@ -51,12 +51,19 @@ button.disabled {
   height: 40px;
 }
 
-.circle-base {
+.circle-base,
+.cover {
+  position: absolute;
+  top: 0; left: 0;
   width: 100%;
   height: 100%;
-  border: 2px solid black;
   border-radius: 50%;
+}
+
+.circle-base {
+  border: 2px solid black;
   background-color: white;
+  z-index: 0;
 }
 
 .stamp {
@@ -65,16 +72,12 @@ button.disabled {
   width: 100%;
   height: 100%;
   object-fit: contain;
+  z-index: 1;
   pointer-events: none;
 }
 
 .cover {
-  position: absolute;
-  top: 0; left: 0;
-  width: 100%;
-  height: 100%;
   background-color: white;
-  border-radius: 50%;
   z-index: 2;
 }
 
