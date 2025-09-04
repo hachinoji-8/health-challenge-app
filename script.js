@@ -167,31 +167,18 @@ manualModeBtn.onclick = () => {
 disappearBtn.onclick = () => {
   goalInput.value = goalDisplay.textContent;
 
-  // 画面切り替え
   startScreen.classList.remove('hidden');
   calendarScreen.classList.add('hidden');
-
-  // カレンダー再生成（保持された challengeDays に基づく）
-  createCalendar(challengeDays);
-
-  const covers = document.querySelectorAll('.cover');
-  for (let i = 0; i < markedCount && i < covers.length; i++) {
-    covers[i].remove();
-  }
-
-  if (markedCount === challengeDays) {
-    submitFormBtn.classList.remove('disabled');
-    submitFormBtn.classList.add('sparkle');
-  } else {
-    submitFormBtn.classList.add('disabled');
-    submitFormBtn.classList.remove('sparkle');
-  }
 
   saveProgress();
 };
 
-// 📜 ページ読み込み時に記録を復元
+// 📜 ページ読み込み時に記録を復元＋チャレンジボタン再仕込み
 window.addEventListener('DOMContentLoaded', () => {
   loadProgress();
   setMarkButtonActive(isNewDay());
+
+  // チャレンジボタンの再仕込み
+  document.getElementById('start-14').onclick = () => startChallenge(14);
+  document.getElementById('start-30').onclick = () => startChallenge(30);
 });
