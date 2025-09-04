@@ -1,60 +1,36 @@
 body {
-  font-family: sans-serif;
-  text-align: center;
-  background: #f5f5f5;
   margin: 0;
-  padding: 20px;
+  padding: 1em;
+  font-family: sans-serif;
+  background-image: url('img/background.jpg');
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center top;
+  text-align: center;
+  touch-action: manipulation;
+  box-sizing: border-box;
 }
 
 .hidden {
   display: none;
 }
 
-#calendar {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
-  gap: 10px;
-  margin: 20px 0;
-}
-
-.calendar-day {
-  position: relative;
-  width: 60px;
-  height: 60px;
-  border-radius: 50%;
-  background: #eee;
-  overflow: hidden;
-}
-
-.circle-base {
-  width: 100%;
-  height: 100%;
-  border-radius: 50%;
-  background: #fff;
-}
-
-.stamp {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  pointer-events: none;
-}
-
-.cover {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  background: rgba(0,0,0,0.3);
-  border-radius: 50%;
-  pointer-events: none;
+input#goal-input {
+  font-size: 1.2em;
+  padding: 0.5em;
+  width: 90%;
+  max-width: 300px;
+  box-sizing: border-box;
 }
 
 button {
-  padding: 10px 20px;
-  margin: 10px;
-  font-size: 16px;
+  font-size: 1em;
+  margin: 0.5em;
+  padding: 0.8em 1.2em;
+  max-width: 90%;
+  box-sizing: border-box;
   cursor: pointer;
+  transition: all 0.3s ease;
 }
 
 button.disabled {
@@ -62,25 +38,68 @@ button.disabled {
   pointer-events: none;
 }
 
-button.sparkle {
-  animation: sparkle 1s infinite alternate;
+#calendar-wrapper {
+  display: flex;
+  justify-content: center;
+  margin: 1em 0;
+}
+
+#calendar {
+  display: grid;
+  grid-template-columns: repeat(7, 40px);
+  gap: 10px;
+  width: calc(7 * 40px + 6 * 10px);
+}
+
+.calendar-day {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  box-sizing: border-box;
+}
+
+.circle-base,
+.cover {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+}
+
+.circle-base {
+  border: 2px solid black;
+  background-color: white;
+  z-index: 0;
+}
+
+.stamp {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.cover {
+  background-color: white;
+  z-index: 2;
+}
+
+.sparkle {
+  animation: sparkle 1s infinite;
 }
 
 @keyframes sparkle {
-  from { box-shadow: 0 0 5px gold; }
-  to { box-shadow: 0 0 15px orange; }
+  0%   { filter: drop-shadow(0 0 5px gold); }
+  50%  { filter: drop-shadow(0 0 10px orange); }
+  100% { filter: drop-shadow(0 0 5px gold); }
 }
 
-#secret-comment {
-  position: fixed;
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: rgba(0,0,0,0.7);
-  color: #fff;
-  padding: 8px 16px;
-  border-radius: 8px;
-  font-size: 14px;
-  z-index: 9999;
-  display: none;
+/* 🧪 テスト用ボタン群 */
+#debug-buttons {
+  margin-top: 1em;
 }
+
