@@ -59,12 +59,24 @@ function setupSecretTriggers() {
   if (!goalEl || !firstDay || !lastDay) return;
 
   const triggers = [
-    { element: goalEl, message: 'リセットの術、発動！' },
-    { element: firstDay, message: '復活の術、発動！' },
-    { element: lastDay, message: '手動モードの術、発動！' }
+    {
+      element: goalEl,
+      message: 'リセットの術、発動！'
+    },
+    {
+      element: firstDay,
+      message: '復活の術、発動！',
+      action: () => {
+        setMarkButtonActive(true);
+      }
+    },
+    {
+      element: lastDay,
+      message: '手動モードの術、発動！'
+    }
   ];
 
-  triggers.forEach(({ element, message }) => {
+  triggers.forEach(({ element, message, action }) => {
     let tapCount = 0;
 
     element.addEventListener('pointerdown', (e) => {
@@ -72,6 +84,7 @@ function setupSecretTriggers() {
       tapCount++;
       if (tapCount >= 10) {
         showComment(message);
+        if (typeof action === 'function') action();
         tapCount = 0;
       }
     });
@@ -254,7 +267,7 @@ manualModeBtn.onclick = () => {
 disappearBtn.onclick = () => {
   goalInput.value = goalDisplay.textContent;
   startScreen.classList.remove('hidden');
-    calendarScreen.classList.add('hidden');
+  calendarScreen.classList.add('hidden');
   setupChallengeButtons();
   saveProgress();
 };
@@ -285,4 +298,3 @@ window.addEventListener('DOMContentLoaded', () => {
   setMarkButtonActive(isNewDay());
   setupChallengeButtons();
 });
-
