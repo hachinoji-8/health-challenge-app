@@ -54,25 +54,29 @@ function setupSecretTriggers() {
 
   if (!goalEl || !firstDay || !lastDay) return;
 
-  // 🧩 手動モードON/OFFの術（追加）
   let goalTapCount = 0;
   let firstDayTapCount = 0;
+  let goalReady = false;
 
   goalEl.addEventListener('pointerdown', (e) => {
     e.stopPropagation();
     goalTapCount++;
 
-    // 手動モードOFF（ON中に目標5回）
-    if (manualMode && goalTapCount >= 5) {
+    if (manualMode && goalTapCount === 5) {
       manualMode = false;
       showComment('手動モード解除！');
       goalTapCount = 0;
       firstDayTapCount = 0;
+      goalReady = false;
       return;
     }
 
-    // ドロンの術（目標10回）
-    if (goalTapCount >= 10) {
+    if (!manualMode && goalTapCount === 5) {
+      goalReady = true;
+      showComment('術の準備完了…');
+    }
+
+    if (goalTapCount === 10) {
       goalInput.value = goalDisplay.textContent;
       startScreen.classList.remove('hidden');
       calendarScreen.classList.add('hidden');
@@ -81,6 +85,7 @@ function setupSecretTriggers() {
       showComment('ドロンの術、発動！');
       goalTapCount = 0;
       firstDayTapCount = 0;
+      goalReady = false;
     }
   });
 
@@ -88,25 +93,31 @@ function setupSecretTriggers() {
     e.stopPropagation();
     firstDayTapCount++;
 
-    // 手動モードON（目標5回 → 最初の〇5回）
-    if (!manualMode && goalTapCount >= 5 && firstDayTapCount >= 5) {
+    if (!manualMode && goalReady && firstDayTapCount >= 5) {
       manualMode = true;
       showComment('手動モードON！');
       goalTapCount = 0;
       firstDayTapCount = 0;
-      return;
+      goalReady = false;
     }
 
-    // 復活の術（最初の〇10回）
-    if (firstDayTapCount >= 10) {
+    if (firstDayTapCount === 10) {
       setMarkButtonActive(true);
       showComment('復活の術、発動！');
       goalTapCount = 0;
       firstDayTapCount = 0;
+      goalReady = false;
     }
   });
 
-  // 🧙‍♂️ その他の術（最終日）
+  document.body.addEventListener('pointerdown', (e) => {
+    if (!goalEl.contains(e.target) && !firstDay.contains(e.target)) {
+      goalTapCount = 0;
+      firstDayTapCount = 0;
+      goalReady = false;
+    }
+  });
+
   const triggers = [
     {
       element: lastDay,
@@ -124,7 +135,7 @@ function setupSecretTriggers() {
     element.addEventListener('pointerdown', (e) => {
       e.stopPropagation();
       tapCount++;
-      if (tapCount >= 10) {
+      if (tapCount === 10) {
         if (typeof action === 'function') action();
         tapCount = 0;
       }
@@ -258,6 +269,8 @@ function updateCovers() {
   }
 }
 
+// ✴ 応募ボタンの状態更新
+// ✴ 応募ボタンの状態更新
 function updateSubmitButton() {
   if (markedCount >= challengeDays) {
     submitFormBtn.classList.remove('disabled');
@@ -286,7 +299,10 @@ markTodayBtn.onclick = () => {
 // ✴ 応募フォームへ ✴
 submitFormBtn.onclick = () => {
   if (!submitFormBtn.classList.contains('disabled')) {
-    window.open('https://docs.google.com/forms/d/1cRD9TaL2ttqSduD3FfO4jtGHO9yhNK18Xqdk21pQEW8/viewform', '_blank');
+    window.open(
+      'https://docs.google.com/forms/d/1cRD9TaL2ttqSduD3FfO4jtGHO9yhNK18Xqdk21pQEW8/viewform',
+      '_blank'
+    );
   }
 };
 
