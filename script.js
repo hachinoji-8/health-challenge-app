@@ -7,7 +7,6 @@ const markTodayBtn = document.getElementById('mark-today');
 const submitFormBtn = document.getElementById('submit-form');
 const successSound = document.getElementById('success-sound');
 
-
 let challengeDays = 0;
 let markedCount = 0;
 let manualMode = false;
@@ -55,27 +54,60 @@ function setupSecretTriggers() {
 
   if (!goalEl || !firstDay || !lastDay) return;
 
+  // 🧩 手動モードON/OFFの術（追加）
+  let goalTapCount = 0;
+  let firstDayTapCount = 0;
+
+  goalEl.addEventListener('pointerdown', (e) => {
+    e.stopPropagation();
+    goalTapCount++;
+
+    // 手動モードOFF（ON中に目標5回）
+    if (manualMode && goalTapCount >= 5) {
+      manualMode = false;
+      showComment('手動モード解除！');
+      goalTapCount = 0;
+      firstDayTapCount = 0;
+      return;
+    }
+
+    // ドロンの術（目標10回）
+    if (goalTapCount >= 10) {
+      goalInput.value = goalDisplay.textContent;
+      startScreen.classList.remove('hidden');
+      calendarScreen.classList.add('hidden');
+      setupChallengeButtons();
+      saveProgress();
+      showComment('ドロンの術、発動！');
+      goalTapCount = 0;
+      firstDayTapCount = 0;
+    }
+  });
+
+  firstDay.addEventListener('pointerdown', (e) => {
+    e.stopPropagation();
+    firstDayTapCount++;
+
+    // 手動モードON（目標5回 → 最初の〇5回）
+    if (!manualMode && goalTapCount >= 5 && firstDayTapCount >= 5) {
+      manualMode = true;
+      showComment('手動モードON！');
+      goalTapCount = 0;
+      firstDayTapCount = 0;
+      return;
+    }
+
+    // 復活の術（最初の〇10回）
+    if (firstDayTapCount >= 10) {
+      setMarkButtonActive(true);
+      showComment('復活の術、発動！');
+      goalTapCount = 0;
+      firstDayTapCount = 0;
+    }
+  });
+
+  // 🧙‍♂️ その他の術（最終日）
   const triggers = [
-    {
-      element: goalEl,
-      message: 'ドロンの術、発動！',
-      action: () => {
-        goalInput.value = goalDisplay.textContent;
-        startScreen.classList.remove('hidden');
-        calendarScreen.classList.add('hidden');
-        setupChallengeButtons();
-        saveProgress();
-        showComment('ドロンの術、発動！');
-      }
-    },
-    {
-      element: firstDay,
-      message: '復活の術、発動！',
-      action: () => {
-        setMarkButtonActive(true);
-        showComment('復活の術、発動！');
-      }
-    },
     {
       element: lastDay,
       message: '手動モードの術、発動！',
@@ -226,7 +258,6 @@ function updateCovers() {
   }
 }
 
-// ✴ 応募ボタンの状態更新
 function updateSubmitButton() {
   if (markedCount >= challengeDays) {
     submitFormBtn.classList.remove('disabled');
@@ -258,7 +289,6 @@ submitFormBtn.onclick = () => {
     window.open('https://docs.google.com/forms/d/1cRD9TaL2ttqSduD3FfO4jtGHO9yhNK18Xqdk21pQEW8/viewform', '_blank');
   }
 };
-
 
 // バルスの術※初期化の１行目で呼出
 function checkAnnualReset() {
