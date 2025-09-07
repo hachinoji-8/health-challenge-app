@@ -59,6 +59,18 @@ function setupSecretTriggers() {
 
   const triggers = [
     {
+      element: goalEl,
+      message: 'ドロンの術、発動！',
+      action: () => {
+        goalInput.value = goalDisplay.textContent;
+        startScreen.classList.remove('hidden');
+        calendarScreen.classList.add('hidden');
+        setupChallengeButtons();
+        saveProgress();
+        showComment('ドロンの術、発動！');
+      }
+    },
+    {
       element: firstDay,
       message: '復活の術、発動！',
       action: () => {
