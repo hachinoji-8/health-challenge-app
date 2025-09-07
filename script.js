@@ -259,8 +259,28 @@ disappearBtn.onclick = () => {
   saveProgress();
 };
 
+// バルスの術※初期化の１行目で呼出
+function checkAnnualReset() {
+  const saved = new Date(localStorage.getItem('lastOpenedDate'));
+  const now = new Date();
+  const threshold = new Date(now.getFullYear(), 8, 15); // 9月15日
+
+  if (saved < threshold && now >= threshold) {
+    // リセット処理
+    markedCount = 0;
+    goalInput.value = '';
+    goalDisplay.textContent = '';
+    localStorage.removeItem('goalText');
+    localStorage.removeItem('markedCount');
+    localStorage.removeItem('challengeDays');
+    startScreen.classList.remove('hidden');
+    calendarScreen.classList.add('hidden');
+  }
+}
+
 // 📜 初期化
 window.addEventListener('DOMContentLoaded', () => {
+  checkAnnualReset();
   loadProgress();
   setMarkButtonActive(isNewDay());
   setupChallengeButtons();
