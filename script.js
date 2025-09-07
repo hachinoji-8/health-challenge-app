@@ -60,30 +60,32 @@ function setupSecretTriggers() {
 
   const triggers = [
     {
-      element: goalEl,
-      message: 'リセットの術、発動！'
-    },
-    {
       element: firstDay,
       message: '復活の術、発動！',
       action: () => {
         setMarkButtonActive(true);
+        showComment('復活の術、発動！');
       }
     },
     {
       element: lastDay,
-      message: '手動モードの術、発動！'
+      message: '手動モードの術、発動！',
+      action: () => {
+        manualMode = !manualMode;
+        manualModeBtn.textContent = manualMode ? '🛠 手動モード：ON' : '🛠 手動モード：OFF';
+        manualModeBtn.classList.toggle('active', manualMode);
+        showComment(manualMode ? '手動モードON！' : '手動モード解除！');
+      }
     }
   ];
 
-  triggers.forEach(({ element, message, action }) => {
+  triggers.forEach(({ element, action }) => {
     let tapCount = 0;
 
     element.addEventListener('pointerdown', (e) => {
       e.stopPropagation();
       tapCount++;
       if (tapCount >= 10) {
-        showComment(message);
         if (typeof action === 'function') action();
         tapCount = 0;
       }
