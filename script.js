@@ -8,7 +8,6 @@ const submitFormBtn = document.getElementById('submit-form');
 const successSound = document.getElementById('success-sound');
 
 const manualModeBtn = document.getElementById('manual-mode');
-const disappearBtn = document.getElementById('disappear');
 
 let challengeDays = 0;
 let markedCount = 0;
@@ -270,14 +269,6 @@ manualModeBtn.onclick = () => {
   manualModeBtn.classList.toggle('active', manualMode);
 };
 
-// 🕶 ドロンの術（物理ボタン）
-disappearBtn.onclick = () => {
-  goalInput.value = goalDisplay.textContent;
-  startScreen.classList.remove('hidden');
-  calendarScreen.classList.add('hidden');
-  setupChallengeButtons();
-  saveProgress();
-};
 
 // バルスの術※初期化の１行目で呼出
 function checkAnnualReset() {
