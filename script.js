@@ -7,7 +7,6 @@ const markTodayBtn = document.getElementById('mark-today');
 const submitFormBtn = document.getElementById('submit-form');
 const successSound = document.getElementById('success-sound');
 
-const manualModeBtn = document.getElementById('manual-mode');
 
 let challengeDays = 0;
 let markedCount = 0;
@@ -260,13 +259,6 @@ submitFormBtn.onclick = () => {
   if (!submitFormBtn.classList.contains('disabled')) {
     window.open('https://docs.google.com/forms/d/1cRD9TaL2ttqSduD3FfO4jtGHO9yhNK18Xqdk21pQEW8/viewform', '_blank');
   }
-};
-
-// 🛠 手動モードの術（物理ボタン）
-manualModeBtn.onclick = () => {
-  manualMode = !manualMode;
-  manualModeBtn.textContent = manualMode ? '🛠 手動モード：ON' : '🛠 手動モード：OFF';
-  manualModeBtn.classList.toggle('active', manualMode);
 };
 
 
