@@ -252,12 +252,6 @@ submitFormBtn.onclick = () => {
   }
 };
 
-// 🔁 今日のチャレンジ復活の術（物理ボタン）
-reviveBtn.onclick = () => {
-  setMarkButtonActive(true);
-  alert('本日分の達成ボタンが復活いたしましたぞ');
-};
-
 // 🛠 手動モードの術（物理ボタン）
 manualModeBtn.onclick = () => {
   manualMode = !manualMode;
