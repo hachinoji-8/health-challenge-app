@@ -7,7 +7,6 @@ const markTodayBtn = document.getElementById('mark-today');
 const submitFormBtn = document.getElementById('submit-form');
 const successSound = document.getElementById('success-sound');
 
-const reviveBtn = document.getElementById('revive-today');
 const manualModeBtn = document.getElementById('manual-mode');
 const disappearBtn = document.getElementById('disappear');
 
