@@ -73,7 +73,6 @@ function setupSecretTriggers() {
 
     if (!manualMode && goalTapCount === 5) {
       goalReady = true;
-      showComment('術の準備完了…');
     }
 
     if (goalTapCount === 10) {
@@ -117,17 +116,6 @@ function setupSecretTriggers() {
       goalReady = false;
     }
   });
-
-  const triggers = [
-    {
-      element: lastDay,
-      message: '手動モードの術、発動！',
-      action: () => {
-        manualMode = !manualMode;
-        showComment(manualMode ? '手動モードON！' : '手動モード解除！');
-      }
-    }
-  ];
 
   triggers.forEach(({ element, action }) => {
     let tapCount = 0;
