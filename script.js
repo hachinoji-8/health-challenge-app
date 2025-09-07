@@ -81,8 +81,6 @@ function setupSecretTriggers() {
       message: '手動モードの術、発動！',
       action: () => {
         manualMode = !manualMode;
-        manualModeBtn.textContent = manualMode ? '🛠 手動モード：ON' : '🛠 手動モード：OFF';
-        manualModeBtn.classList.toggle('active', manualMode);
         showComment(manualMode ? '手動モードON！' : '手動モード解除！');
       }
     }
