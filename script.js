@@ -50,7 +50,6 @@ function setupSecretTriggers() {
   const calendarDays = document.querySelectorAll('.calendar-day');
   const goalEl = document.getElementById('goal-display');
   const firstDay = calendarDays[0];
-  const lastDay = calendarDays[calendarDays.length - 1];
 
   if (!goalEl || !firstDay || !lastDay) return;
 
@@ -115,25 +114,6 @@ function setupSecretTriggers() {
       firstDayTapCount = 0;
       goalReady = false;
     }
-  });
-
-  triggers.forEach(({ element, action }) => {
-    let tapCount = 0;
-
-    element.addEventListener('pointerdown', (e) => {
-      e.stopPropagation();
-      tapCount++;
-      if (tapCount === 10) {
-        if (typeof action === 'function') action();
-        tapCount = 0;
-      }
-    });
-
-    document.body.addEventListener('pointerdown', (e) => {
-      if (!element.contains(e.target)) {
-        tapCount = 0;
-      }
-    });
   });
 }
 
