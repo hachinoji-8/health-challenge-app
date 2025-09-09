@@ -51,7 +51,7 @@ function setupSecretTriggers() {
   const goalEl = document.getElementById('goal-display');
   const firstDay = calendarDays[0];
 
-  if (!goalEl || !firstDay || !lastDay) return;
+  if (!goalEl || !firstDay) return;
 
   let goalTapCount = 0;
   let firstDayTapCount = 0;
