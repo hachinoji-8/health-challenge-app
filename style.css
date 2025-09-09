@@ -97,9 +97,11 @@ button.disabled {
 
 .circle-base {
   border: 3px solid black; /* ← 太くした */
-  border-style: solid;
+  border-radius: 50%;
   background-color: white;
-  z-index: 0;
+  backface-visibility: hidden;
+  will-change: transform;
+  transform: translateZ(0); /* ← GPU最適化の術 */
 }
 
 .stamp {
