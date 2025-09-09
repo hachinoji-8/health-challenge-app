@@ -1,5 +1,34 @@
 <!DOCTYPE html>
-<html lang="ja"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"><title>目標達成カレンダー</title><link rel="stylesheet" href="style.css"></head><body><div id="start-screen"><h1>目標達成カレンダー</h1><input type="text" id="goal-input" maxlength="20" placeholder="目標を入力（20字以内）"><div id="challenge-buttons"><button id="start-14">🌟きっずチャレンジ🌟 14日間スタート</button><button id="start-30">🌟健康チャレンジ🌟 30日間スタート</button></div></div><div id="calendar-screen" class="hidden"><h2 id="goal-display"></h2><div id="calendar-wrapper"><div id="calendar"></div></div>
-<button id="mark-today">🎯今日のチャレンジ達成🎯</button> <button id="submit-form" class="disabled">✨応募フォームへ✨</button><audio id="success-sound" src="img/success.mp3" preload="auto"></audio>
-<script src="script.js"></script>
-</body></html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+  <title>目標達成カレンダー</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="start-screen">
+    <h1>目標達成カレンダー</h1>
+    <input type="text" id="goal-input" maxlength="20" placeholder="目標を入力（20字以内）">
+    <div id="challenge-buttons">
+      <button id="start-14">🌟きっずチャレンジ🌟 14日間スタート</button>
+      <button id="start-30">🌟健康チャレンジ🌟 30日間スタート</button>
+    </div>
+  </div>
+
+  <div id="calendar-screen" class="hidden">
+    <h2 id="goal-display"></h2>
+
+    <div id="calendar-wrapper">
+      <div id="calendar"></div>
+    </div>
+
+    <button id="mark-today">🎯今日のチャレンジ達成🎯</button>
+    <button id="submit-form" class="disabled">✨応募フォームへ✨</button>
+
+    <audio id="success-sound" src="img/success.mp3" preload="auto"></audio>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
